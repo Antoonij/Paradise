@@ -25,7 +25,7 @@
 		return
 
 	if(alert("Are you sure want to spawn as a mentor mouse? That action will turn off respawnability!",,"Yes", "No") == "Yes")
-		var/mob/living/simple_animal/mouse/mentor/M = new(usr.loc)
+		var/mob/living/simple_animal/mouse/mentor/M = new(ghost.loc)
 		M.key = ghost.key
 		M.verbs -= /mob/living/verb/ghost // idk how to fix qdel in ghostize, just use Mentor Mouse verb again..
 		GLOB.non_respawnable_keys += M.ckey
