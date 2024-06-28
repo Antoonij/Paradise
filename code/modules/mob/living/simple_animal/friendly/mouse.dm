@@ -53,7 +53,7 @@
 			/mob/living/simple_animal/mouse/brown,
 			/mob/living/simple_animal/mouse/gray,
 			/mob/living/simple_animal/mouse/white,
-			/mob/living/simple_animal/mouse/blobinfected)
+			/mob/living/simple_animal/mouse/mentor)
 
 /mob/living/simple_animal/mouse/Initialize(mapload)
 	. = ..()
@@ -238,7 +238,6 @@
 	audio_cooldown = 1 MINUTES
 	var/anim_type = SNIFF
 	volume = 1
-	emote_type = EMOTE_VISIBLE|EMOTE_FORCE_NO_RUNECHAT
 
 /datum/emote/living/simple_animal/mouse/idle/run_emote(mob/living/simple_animal/mouse/user, params, type_override, intentional)
 	INVOKE_ASYNC(user, TYPE_PROC_REF(/mob/living/simple_animal/mouse, do_idle_animation), anim_type)
@@ -282,6 +281,29 @@
 	mouse_color = "brown"
 	icon_state = "mouse_brown"
 	tts_seed = "Clockwerk"
+
+mob/living/simple_animal/mouse/mentor
+	name = "Mentor Mouse"
+	mouse_color = "brown"
+	icon_state = "mouse_brown"
+	tts_seed = "Clockwerk"
+	gold_core_spawnable = NO_SPAWN
+
+mob/living/simple_animal/mouse/mentor/attack_ghost(mob/user)
+	return FALSE
+
+/mob/living/simple_animal/mouse/mentor/pull_constraint(atom/movable/AM, show_message = FALSE)
+	return FALSE
+
+/mob/living/simple_animal/mouse/mentor/death(gibbed)
+	playsound(get_turf(src), 'sound/effects/phasein.ogg', 100, 1)
+	qdel(src)
+	. = ..()
+/mob/living/simple_animal/mouse/mentor/New()
+	playsound(get_turf(src), 'sound/effects/phasein.ogg', 100, 1)
+	src.add_language(LANGUAGE_GALACTIC_COMMON)
+	. = ..()
+
 
 //TOM IS ALIVE! SQUEEEEEEEE~K :)
 /mob/living/simple_animal/mouse/brown/Tom
