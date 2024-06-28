@@ -53,6 +53,7 @@
 			/mob/living/simple_animal/mouse/brown,
 			/mob/living/simple_animal/mouse/gray,
 			/mob/living/simple_animal/mouse/white,
+			/mob/living/simple_animal/mouse/blobinfected,
 			/mob/living/simple_animal/mouse/mentor)
 
 /mob/living/simple_animal/mouse/Initialize(mapload)
@@ -238,6 +239,7 @@
 	audio_cooldown = 1 MINUTES
 	var/anim_type = SNIFF
 	volume = 1
+	emote_type = EMOTE_VISIBLE|EMOTE_FORCE_NO_RUNECHAT
 
 /datum/emote/living/simple_animal/mouse/idle/run_emote(mob/living/simple_animal/mouse/user, params, type_override, intentional)
 	INVOKE_ASYNC(user, TYPE_PROC_REF(/mob/living/simple_animal/mouse, do_idle_animation), anim_type)
