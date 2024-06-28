@@ -74,7 +74,8 @@ GLOBAL_LIST_INIT(admin_verbs_admin, list(
 	/client/proc/ccbdb_lookup_ckey,
 	/client/proc/toggle_pacifism_gt,
 	/client/proc/toogle_ghost_vision,
-	/datum/admins/proc/changetitlescreen
+	/datum/admins/proc/changetitlescreen,
+	/client/proc/MentorMouse
 ))
 GLOBAL_LIST_INIT(admin_verbs_ban, list(
 	/client/proc/ban_panel,
