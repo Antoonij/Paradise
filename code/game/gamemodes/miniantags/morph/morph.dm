@@ -285,6 +285,18 @@
 	restore_form()
 	return ..()
 
+/mob/living/simple_animal/hostile/morph/bullet_act(obj/item/projectile/P)
+	if(stat == DEAD)
+		restore_form()
+		..()
+	var/block_chance = ((health - P.damage)*0.3)+5
+	if (!morphed && prob(block_chance) && P.damage_type == BRUTE)
+		var/food_value = calc_food_gained(P)
+		if(food_value + gathered_food > 0)
+			eat(P)
+			return
+	..()
+
 /mob/living/simple_animal/hostile/morph/attack_animal(mob/living/simple_animal/animal)
 	if(animal.a_intent == INTENT_HELP && ambush_prepared)
 		to_chat(animal, "<span class='notice'>You nuzzle [src].</span><span class='danger'> And [src] nuzzles back!</span>")
