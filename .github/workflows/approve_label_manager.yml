@@ -1,0 +1,41 @@
+name: Approve Label Manager
+
+on:
+  pull_request:
+    types: [submitted, dismissed]
+
+env:
+  APPROVE_LABEL: 'Has Approve'
+
+jobs:
+  manage-approve-label:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check for ${{ env.APPROVE_LABEL }} label
+        id: check_approve_label
+        uses: actions/github-script@v7
+        with:
+          script: |
+            return context.payload.pull_request.labels?
+            .some(label => label.name === process.env.APPROVE_LABEL);
+
+      - name: Add label
+        uses: jburgess/AddRemovePrLabels@v1.0.4
+        if: |
+          github.event.action === 'submitted' &&
+          github.event.review.state === 'approved' &&
+          !steps.check_approve_label.outputs.result
+        with:
+          githubToken: '${{ secrets.GITHUB_TOKEN }}'
+          labelsToAdd: ${{ env.APPROVE_LABEL }}
+
+      - name: Remove label
+        uses: jburgess/AddRemovePrLabels@v1.0.4
+        if: |
+          (github.event.action === 'dismissed' || 
+          (github.event.action === 'submitted' && 
+          github.event.review.state !== 'approved')) && 
+          steps.check_approve_label.outputs.result
+        with:
+          githubToken: '${{ secrets.GITHUB_TOKEN }}'
+          labelsToRemove: ${{ env.APPROVE_LABEL }}
