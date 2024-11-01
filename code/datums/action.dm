@@ -5,7 +5,7 @@
 
 /datum/action
 	var/name = "Generic Action"
-	var/desc = null
+	var/desc
 	var/obj/target = null
 	var/check_flags = 0
 	var/invisibility = FALSE
