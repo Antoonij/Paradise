@@ -31,7 +31,7 @@
     INVOKE_ASYNC(src, PROC_REF(make_them_smol), target, result)
 
 /datum/element/smol/proc/make_them_smol(mob/living/target, list/result)
-    if(!LAZYIN(allowed_ckeys, target.ckey) || !is_admin(target))
+    if(!LAZYIN(allowed_ckeys, target.ckey) && !is_admin(target))
         return
 
     LAZYADD(result, "Congratulations, you made them smol!")
