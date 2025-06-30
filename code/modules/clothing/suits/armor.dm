@@ -78,11 +78,11 @@
 	if(istype(I, /obj/item/clothing/accessory/holobadge))
 		add_fingerprint(user)
 		if(attached_badge)
-			to_chat(user, span_warning("The [name] already has [attached_badge]."))
+			to_chat(user, span_warning("На [declent_ru(PREPOSITIONAL)] уже есть [attached_badge.declent_ru(NOMINATIVE)]."))
 			return ATTACK_CHAIN_PROCEED
 		if(!user.drop_transfer_item_to_loc(I, src))
 			return ..()
-		to_chat(user, span_notice("You attach [I] to [src]."))
+		to_chat(user, span_notice("Вы прицепили [I.declent_ru(ACCUSATIVE)] к [declent_ru(DATIVE)]."))
 		attached_badge = I
 		var/datum/action/item_action/remove_badge/holoaction = new(src)
 		holoaction.Grant(user)
@@ -102,7 +102,7 @@
 		attached_badge = null
 		update_appearance(UPDATE_ICON_STATE|UPDATE_DESC)
 		update_equipped_item()
-		to_chat(user, span_notice("You remove [attached_badge] from [src]."))
+		to_chat(user, span_notice("Вы снимаете [attached_badge.declent_ru(ACCUSATIVE)] с [declent_ru(GENITIVE)]."))
 		return
 	..()
 
@@ -314,18 +314,66 @@
 
 /obj/item/clothing/suit/armor/laserproof
 	name = "Ablative Armor Vest"
-	desc = "A vest that excels in protecting the wearer against energy projectiles. Projects an energy field around the user, allowing a chance of energy projectile deflection no matter where on the user it would hit."
+	desc = "Экспериментальный высокотехнологичный бронежилет, изготовленный из светоотражающего материала, предназначен для отражения энергетических лучей. Устаревшая амуниция, была снята с вооружения НаноТрейзен."
+	ru_names = list(
+		NOMINATIVE = "абляционный бронежилет",
+		GENITIVE = "абляционного бронежилета",
+		DATIVE = "абляционному бронежилету",
+		ACCUSATIVE = "абляционный бронежилет",
+		INSTRUMENTAL = "абляционным бронежилетом",
+		PREPOSITIONAL = "абляционном бронежилете"
+	)
 	icon_state = "armor_reflec"
 	item_state = "armor_reflec"
 	blood_overlay_type = "armor"
 	armor = list("melee" = 10, "bullet" = 10, "laser" = 60, "energy" = 50, "bomb" = 0, "bio" = 0, "rad" = 0, "fire" = 100, "acid" = 100)
 	resistance_flags = INDESTRUCTIBLE | LAVA_PROOF | FIRE_PROOF | ACID_PROOF
-	var/hit_reflect_chance = 40
+	var/hit_reflect_chance = 50
+
+/obj/item/clothing/suit/armor/reflector
+	name = "reflector coat"
+	desc = "Высокотехнологичное инновационное пальто, изготовленное из светоотражающего материала, предназначенное для отражения энергетических лучей. Сочетает в себе стиль и самые передовые технологии."
+	ru_names = list(
+		NOMINATIVE = "рефлекторное пальто",
+		GENITIVE = "рефлекторное пальто",
+		DATIVE = "рефлекторному пальто",
+		ACCUSATIVE = "рефлекторное пальто",
+		INSTRUMENTAL = "рефлекторным пальто",
+		PREPOSITIONAL = "рефлекторном пальто"
+	)
+	icon_state = "reflector"
+	item_state = "reflector"
+	blood_overlay_type = "armor"
+	body_parts_covered = UPPER_TORSO|LOWER_TORSO|LEGS|ARMS
+	armor = list("melee" = 10, "bullet" = 10, "laser" = 60, "energy" = 60, "bomb" = 0, "bio" = 0, "rad" = 0, "fire" = 100, "acid" = 100)
+	resistance_flags = INDESTRUCTIBLE | LAVA_PROOF | FIRE_PROOF | ACID_PROOF
+	sprite_sheets = list(
+		SPECIES_DRASK = 'icons/mob/clothing/species/drask/suit.dmi',
+		SPECIES_GREY = 'icons/mob/clothing/species/grey/suit.dmi',
+		SPECIES_MONKEY = 'icons/mob/clothing/species/monkey/suit.dmi',
+		SPECIES_FARWA = 'icons/mob/clothing/species/monkey/suit.dmi',
+		SPECIES_WOLPIN = 'icons/mob/clothing/species/monkey/suit.dmi',
+		SPECIES_NEARA = 'icons/mob/clothing/species/monkey/suit.dmi',
+		SPECIES_STOK = 'icons/mob/clothing/species/monkey/suit.dmi',
+		SPECIES_UNATHI = 'icons/mob/clothing/species/unathi/suit.dmi',
+		SPECIES_ASHWALKER_BASIC = 'icons/mob/clothing/species/unathi/suit.dmi',
+		SPECIES_ASHWALKER_SHAMAN = 'icons/mob/clothing/species/unathi/suit.dmi',
+		SPECIES_DRACONOID = 'icons/mob/clothing/species/unathi/suit.dmi',
+		SPECIES_VOX = 'icons/mob/clothing/species/vox/suit.dmi',
+		)
+	var/list/reflect_zones = list(BODY_ZONE_CHEST, BODY_ZONE_PRECISE_GROIN, BODY_ZONE_L_ARM, BODY_ZONE_R_ARM)
+	var/hit_reflect_chance = 50
+
+/obj/item/clothing/suit/armor/reflector/IsReflect(def_zone)
+	if(!(def_zone in reflect_zones))
+		return FALSE
+	if (prob(hit_reflect_chance))
+		return TRUE
 
 /obj/item/clothing/suit/armor/laserproof/Initialize(mapload)
 	. = ..()
 	AddElement(/datum/element/high_value_item)
-	
+
 /obj/item/clothing/suit/armor/laserproof/IsReflect()
 	if(prob(hit_reflect_chance))
 		return 1
@@ -362,15 +410,12 @@
 
 /obj/item/clothing/suit/armor/reactive/attack_self(mob/user)
 	if(emp_d)
-		to_chat(user, span_warning("[src] is disabled from an electromagnetic pulse!"))
+		to_chat(user, span_warning("[capitalize(declent_ru(NOMINATIVE))] отключён из-за электромагнитного импульса!"))
 		return
 	active = !active
 	update_icon(UPDATE_ICON_STATE)
 	add_fingerprint(user)
-	if(active)
-		to_chat(user, span_notice("[src] is now active."))
-	else
-		to_chat(user, span_notice("[src] is now inactive."))
+	to_chat(user, span_notice("[capitalize(declent_ru(NOMINATIVE))] теперь [active ? "активен" : "неактивен"]."))
 	update_equipped_item()
 
 
@@ -381,7 +426,7 @@
 	addtimer(CALLBACK(src, PROC_REF(reboot)), 100 / severity)
 	if(ishuman(loc))
 		var/mob/living/carbon/human/user = loc
-		to_chat(user, span_warning("[src] starts malfunctioning!"))
+		to_chat(user, span_warning("[capitalize(declent_ru(NOMINATIVE))] начинает глючить!"))
 		update_equipped_item()
 	..()
 
@@ -391,7 +436,7 @@
 	if(ishuman(loc))
 		var/mob/living/carbon/human/user = loc
 		update_equipped_item()
-		to_chat(user, span_notice("Looks like [src] returns its functionality."))
+		to_chat(user, span_notice("Похоже, [declent_ru(NOMINATIVE)] снова функционирует нормально."))
 
 
 //When the wearer gets hit, this armor will teleport the user a short distance away (to safety or to more danger, no one knows. That's the fun of it!)
@@ -404,12 +449,15 @@
 	. = ..()
 	AddElement(/datum/element/high_value_item)
 
-/obj/item/clothing/suit/armor/reactive/teleport/hit_reaction(mob/living/carbon/human/owner, atom/movable/hitby, attack_text = "the attack", final_block_chance = 0, damage = 0, attack_type = ITEM_ATTACK)
+/obj/item/clothing/suit/armor/reactive/teleport/hit_reaction(mob/living/carbon/human/owner, atom/movable/hitby, attack_text = "атаку", final_block_chance = 0, damage = 0, attack_type = ITEM_ATTACK)
 	if(!active)
 		return 0
 	if(prob(hit_reaction_chance))
 		var/mob/living/carbon/human/H = owner
-		owner.visible_message("<span class='danger'>The reactive teleport system flings [H] clear of [attack_text]!</span>")
+		owner.visible_message(
+			span_danger("Реактивная телепортная система отражает [attack_text] [H.declent_ru(GENITIVE)]!"),
+			projectile_message = (attack_type == PROJECTILE_ATTACK)
+		)
 		var/list/turfs = new/list()
 		for(var/turf/T in orange(tele_range, H))
 			if(isspaceturf(T))
@@ -433,11 +481,14 @@
 /obj/item/clothing/suit/armor/reactive/fire
 	name = "reactive incendiary armor"
 
-/obj/item/clothing/suit/armor/reactive/fire/hit_reaction(mob/living/carbon/human/owner, atom/movable/hitby, attack_text = "the attack", final_block_chance = 0, damage = 0, attack_type = ITEM_ATTACK)
+/obj/item/clothing/suit/armor/reactive/fire/hit_reaction(mob/living/carbon/human/owner, atom/movable/hitby, attack_text = "атаку", final_block_chance = 0, damage = 0, attack_type = ITEM_ATTACK)
 	if(!active)
 		return 0
 	if(prob(hit_reaction_chance))
-		owner.visible_message("<span class='danger'>The [src] blocks the [attack_text], sending out jets of flame!</span>")
+		owner.visible_message(
+			span_danger("[capitalize(declent_ru(NOMINATIVE))] блокирует [attack_text], выпуская струи пламени!"),
+			projectile_message = (attack_type == PROJECTILE_ATTACK)
+		)
 		for(var/mob/living/carbon/C in range(6, owner))
 			if(C != owner)
 				C.fire_stacks += 8
@@ -449,7 +500,7 @@
 /obj/item/clothing/suit/armor/reactive/stealth
 	name = "reactive stealth armor"
 
-/obj/item/clothing/suit/armor/reactive/stealth/hit_reaction(mob/living/carbon/human/owner, atom/movable/hitby, attack_text = "the attack", final_block_chance = 0, damage = 0, attack_type = ITEM_ATTACK)
+/obj/item/clothing/suit/armor/reactive/stealth/hit_reaction(mob/living/carbon/human/owner, atom/movable/hitby, attack_text = "удар", final_block_chance = 0, damage = 0, attack_type = ITEM_ATTACK)
 	if(!active)
 		return 0
 	if(prob(hit_reaction_chance))
@@ -458,7 +509,10 @@
 		E.GiveTarget(owner) //so it starts running right away
 		E.Goto(owner, E.move_to_delay, E.minimum_distance)
 		owner.alpha = 0
-		owner.visible_message("<span class='danger'>[owner] is hit by [attack_text] in the chest!</span>") //We pretend to be hit, since blocking it would stop the message otherwise
+		owner.visible_message(
+			span_danger("[owner] получает [attack_text] в грудь!"),
+			projectile_message = (attack_type == PROJECTILE_ATTACK)
+		) //We pretend to be hit, since blocking it would stop the message otherwise
 		spawn(40)
 			owner.alpha = initial(owner.alpha)
 		return 1
@@ -466,11 +520,14 @@
 /obj/item/clothing/suit/armor/reactive/tesla
 	name = "reactive tesla armor"
 
-/obj/item/clothing/suit/armor/reactive/tesla/hit_reaction(mob/living/carbon/human/owner, atom/movable/hitby, attack_text = "the attack", final_block_chance = 0, damage = 0, attack_type = ITEM_ATTACK)
+/obj/item/clothing/suit/armor/reactive/tesla/hit_reaction(mob/living/carbon/human/owner, atom/movable/hitby, attack_text = "атаку", final_block_chance = 0, damage = 0, attack_type = ITEM_ATTACK)
 	if(!active)
 		return 0
 	if(prob(hit_reaction_chance))
-		owner.visible_message("<span class='danger'>The [src] blocks the [attack_text], sending out arcs of lightning!</span>")
+		owner.visible_message(
+			span_danger("[capitalize(declent_ru(NOMINATIVE))] блокирует [attack_text], испуская разряды молний!"),
+			projectile_message = (attack_type == PROJECTILE_ATTACK)
+		)
 		for(var/mob/living/M in view(6, owner))
 			if(M == owner)
 				continue
@@ -647,7 +704,7 @@
 	item_state = "goliath_cloak"
 	desc = "A staunch, practical cape made out of numerous monster materials, it is coveted amongst exiles & hermits."
 	allowed = list(/obj/item/flashlight, /obj/item/tank/internals, /obj/item/pickaxe, /obj/item/twohanded/spear, /obj/item/organ/internal/regenerative_core/legion, /obj/item/kitchen/knife/combat/survival, /obj/item/twohanded/kinetic_crusher, /obj/item/hierophant_club, /obj/item/twohanded/fireaxe/boneaxe)
-	armor = list("melee" = 40, "bullet" = 15, "laser" = 30, "energy" = 15, "bomb" = 35, "bio" = 0, "rad" = 0, "fire" = 60, "acid" = 60) //a fair alternative to bone armor, requiring alternative materials and gaining a suit slot
+	armor = list(MELEE = 40, BULLET = 15, LASER = 30, ENERGY = 15, BOMB = 35, BIO = 0, RAD = 0, FIRE = 80, ACID = 60) //a fair alternative to bone armor, requiring alternative materials and gaining a suit slot
 	hoodtype = /obj/item/clothing/head/hooded/goliath
 	body_parts_covered = UPPER_TORSO|LOWER_TORSO|ARMS
 
@@ -656,7 +713,7 @@
 	icon_state = "golhood"
 	item_state = "golhood"
 	desc = "A protective & concealing hood."
-	armor = list("melee" = 40, "bullet" = 15, "laser" = 30, "energy" = 15, "bomb" = 35, "bio" = 0, "rad" = 0, "fire" = 60, "acid" = 60)
+	armor = list(MELEE = 40, BULLET = 15, LASER = 30, ENERGY = 15, BOMB = 35, BIO = 0, RAD = 0, FIRE = 80, ACID = 60)
 	flags_inv = HIDEHAIR
 	flags_cover = HEADCOVERSEYES
 
@@ -722,3 +779,95 @@
 		SPECIES_GREY = 'icons/mob/clothing/species/grey/suit.dmi',
 		)
 
+/obj/item/clothing/suit/armor/cartilage //parent type, used in order not to copy-paste same lines in 3 same armors
+	name = "cartilage armor"
+	desc = "Полностью завершённая броня, сделанная из хрящевых пластин лавовой рыбы. Крепче своих костяных аналогов."
+	ru_names = list(
+		NOMINATIVE = "броня из хрящевых пластин",
+		GENITIVE = "брони из хрящевых пластин",
+		DATIVE = "броне из хрящевых пластин",
+		ACCUSATIVE = "броню из хрящевых пластин",
+		INSTRUMENTAL = "броней из хрящевых пластин",
+		PREPOSITIONAL = "броне из хрящевых пластин"
+	)
+	gender = FEMALE
+	icon_state = "cartilage_set"
+	item_state = "cartilage_set"
+	blood_overlay_type = "armor"
+	allowed = list(/obj/item/flashlight, /obj/item/tank/internals, /obj/item/pickaxe, /obj/item/twohanded/spear, /obj/item/organ/internal/regenerative_core/legion, /obj/item/kitchen/knife/combat/survival, /obj/item/twohanded/kinetic_crusher, /obj/item/hierophant_club, /obj/item/twohanded/fireaxe/boneaxe)
+	armor = list(MELEE = 50, BULLET = 10, LASER = 10, ENERGY = 10, BOMB = 10, BIO = 0, RAD = 0, FIRE = 60, ACID = 60)
+	body_parts_covered = UPPER_TORSO|LOWER_TORSO|LEGS|ARMS
+	sprite_sheets = list(
+		SPECIES_UNATHI = 'icons/mob/clothing/species/unathi/suit.dmi',
+		SPECIES_ASHWALKER_BASIC = 'icons/mob/clothing/species/unathi/suit.dmi',
+		SPECIES_ASHWALKER_SHAMAN = 'icons/mob/clothing/species/unathi/suit.dmi',
+		SPECIES_DRACONOID = 'icons/mob/clothing/species/unathi/suit.dmi',
+		SPECIES_VOX = 'icons/mob/clothing/species/vox/suit.dmi',
+		SPECIES_GREY = 'icons/mob/clothing/species/grey/suit.dmi',
+		SPECIES_MONKEY = 'icons/mob/clothing/species/monkey/suit.dmi',
+		SPECIES_FARWA = 'icons/mob/clothing/species/monkey/suit.dmi',
+		SPECIES_WOLPIN = 'icons/mob/clothing/species/monkey/suit.dmi',
+		SPECIES_NEARA = 'icons/mob/clothing/species/monkey/suit.dmi',
+		SPECIES_STOK = 'icons/mob/clothing/species/monkey/suit.dmi'
+		)
+
+
+/obj/item/clothing/suit/armor/cartilage/cartilage_pads
+	name = "cartilage shoulder pads"
+	desc = "Достаточно крепкие наплечники, сделанные из хрящевых пластин. Защищают тело, но не предоставляют защиты для ног. Могут быть улучшены до полноценной брони в случае, если будут соединены с поножами, сделанными из того же материала."
+	ru_names = list(
+		NOMINATIVE = "наплечники из хрящевых пластин",
+		GENITIVE = "наплечников из хрящевых пластин",
+		DATIVE = "наплечникам из хрящевых пластин",
+		ACCUSATIVE = "наплечники из хрящевых пластин",
+		INSTRUMENTAL = "наплечниками из хрящевых пластин",
+		PREPOSITIONAL = "наплечниках из хрящевых пластин"
+	)
+	gender = PLURAL
+	icon_state = "cartilage_shoulder_pads"
+	item_state = "cartilage_shoulder_pads"
+	body_parts_covered = UPPER_TORSO|ARMS
+
+/obj/item/clothing/suit/armor/cartilage/cartilage_pads/attackby(obj/item/I, mob/user, params)
+	if(istype(I, /obj/item/clothing/suit/armor/cartilage/cartilage_greaves))
+		add_fingerprint(user)
+		to_chat(user, span_notice("Вы начинаете подвязывать части брони."))
+		if(do_after(user, 4 SECONDS, src, max_interact_count = 1))
+			to_chat(user, span_notice("Вы улучшили броню!"))
+			var/turf/user_turf = get_turf(user)
+			var/obj/item/clothing/suit/armor/cartilage/armor = new(user_turf)
+			user.put_in_inactive_hand(armor)
+			qdel(I)
+			qdel(src)
+		return ATTACK_CHAIN_BLOCKED_ALL
+	return ..()
+
+/obj/item/clothing/suit/armor/cartilage/cartilage_greaves
+	name = "cartilage greaves"
+	desc = "Достаточно крепкие поножи, сделанные из хрящевых пластин. Защищают ноги, но не предоставляют защиты для торса. Могут быть улучшены до полноценной брони в случае, если будут соединены с наплечниками, сделанными из того же материала."
+	ru_names = list(
+		NOMINATIVE = "поножи из хрящевых пластин",
+		GENITIVE = "поножей из хрящевых пластин",
+		DATIVE = "поножам из хрящевых пластин",
+		ACCUSATIVE = "поножи из хрящевых пластин",
+		INSTRUMENTAL = "поножами из хрящевых пластин",
+		PREPOSITIONAL = "поножах из хрящевых пластин"
+	) //i actually have to google it
+	gender = PLURAL
+	icon_state = "cartilage_greaves"
+	item_state = "cartilage_greaves"
+	body_parts_covered = LOWER_TORSO|LEGS
+
+/obj/item/clothing/suit/armor/cartilage/cartilage_greaves/attackby(obj/item/I, mob/user, params)
+	if(istype(I, /obj/item/clothing/suit/armor/cartilage/cartilage_pads))
+		add_fingerprint(user)
+		to_chat(user, span_notice("Вы начинаете подвязывать части брони."))
+		if(do_after(user, 4 SECONDS, src, max_interact_count = 1))
+			to_chat(user, span_notice("Вы улучшили броню!"))
+			var/turf/user_turf = get_turf(user)
+			var/obj/item/clothing/suit/armor/cartilage/armor = new(user_turf)
+			user.put_in_inactive_hand(armor)
+			qdel(I)
+			qdel(src)
+			return ATTACK_CHAIN_BLOCKED_ALL
+	return ..()

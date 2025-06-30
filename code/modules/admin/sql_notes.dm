@@ -8,7 +8,7 @@
 		return
 
 	if(!target_ckey)
-		var/new_ckey = ckey(clean_input("Who would you like to add a note for?","Enter a ckey",null))
+		var/new_ckey = ckey(tgui_input_text(usr, "Who would you like to add a note for?", "Enter a ckey", null))
 		if(!new_ckey)
 			return
 		target_ckey = ckey(new_ckey)
@@ -42,7 +42,7 @@
 		crew_number = play_records[EXP_TYPE_CREW]
 
 	if(!notetext)
-		notetext = input(usr,"Write your note","Add Note") as message|null
+		notetext = tgui_input_text(usr, "Write your note", "Add Note", multiline = TRUE, encode = FALSE)
 		if(!notetext)
 			return
 
@@ -134,7 +134,7 @@
 		target_ckey = query_find_note_edit.item[1]
 		var/old_note = query_find_note_edit.item[2]
 		var/adminckey = query_find_note_edit.item[3]
-		var/new_note = input("Input new note", "New Note", "[old_note]") as message|null
+		var/new_note = tgui_input_text(usr, "Input new note", "New Note", "[old_note]", multiline = TRUE, encode = FALSE)
 		if(!new_note)
 			return
 		var/server
@@ -202,7 +202,7 @@
 			if(!linkless)
 				output += " <a href='byond://?_src_=holder;removenote=[id]'>\[Remove Note\]</a> <a href='byond://?_src_=holder;editnote=[id]'>\[Edit Note\]</a>"
 				if(last_editor)
-					output += " <font size='2'>Last edit by [last_editor]</font>"
+					output += " <span style='font-size: 2;'>Last edit by [last_editor]</span>"
 			output += "<br>[notetext]<hr style='background:#000000; border:0; height:1px'>"
 		qdel(query_get_notes)
 	else if(index)
@@ -234,11 +234,10 @@
 	else
 		output += "<center><a href='byond://?_src_=holder;addnoteempty=1'>\[Add Note\]</a></center>"
 		output += ruler
-	usr << browse(output.Join(""), "window=show_notes;size=900x500")
 	var/datum/browser/popup = new(usr, "show_notes", "<div align='center'>Notes</div>", 900, 500)
 	popup.set_content(output.Join(""))
 	popup.set_window_options("can_close=1;can_minimize=0;can_maximize=0;can_resize=0;titlebar=1;")
 	popup.add_stylesheet("dark_inputs", "html/dark_inputs.css")
-	popup.open()
+	popup.open(TRUE)
 	onclose(usr, "show_notes")
 

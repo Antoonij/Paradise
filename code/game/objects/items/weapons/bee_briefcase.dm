@@ -2,6 +2,15 @@
 /obj/item/bee_briefcase
 	name = "briefcase"
 	desc = "This briefcase has easy-release clasps and smells vaguely of honey and blood..."
+	ru_names = list(
+		NOMINATIVE = "портфель",
+		GENITIVE = "портфеля",
+		DATIVE = "портфелю",
+		ACCUSATIVE = "портфель",
+		INSTRUMENTAL = "портфелем",
+		PREPOSITIONAL = "портфеле"
+	)
+	gender = MALE
 	description_antag = "A briefcase filled with deadly bees, you should inject this with a syringe of your own blood before opening it."
 	icon = 'icons/obj/storage.dmi'
 	icon_state = "briefcase"
@@ -26,9 +35,9 @@
 	. = ..()
 	if(loc == user)
 		if(bees_left)
-			. += "<span class='warning'>There are [bees_left] bees still inside in briefcase!</span>"
+			. += span_warning("There are [bees_left] bees still inside in briefcase!")
 		else
-			. += "<span class='warning'>The bees are gone... Colony collapse disorder?</span>"
+			. += span_warning("The bees are gone... Colony collapse disorder?")
 
 
 /obj/item/bee_briefcase/attackby(obj/item/I, mob/user, params)
@@ -72,7 +81,7 @@
 
 /obj/item/bee_briefcase/attack_self(mob/user as mob)
 	if(!bees_left)
-		to_chat(user, "<span class='danger'>The lack of all and any bees at this event has been somewhat of a let-down...</span>")
+		to_chat(user, span_danger("The lack of all and any bees at this event has been somewhat of a let-down..."))
 		return
 	else
 		if(world.time >= next_sound)		//This cooldown doesn't prevent us from releasing bees, just stops the sound

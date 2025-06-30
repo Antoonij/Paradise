@@ -5,6 +5,7 @@ GLOBAL_DATUM_INIT(fire_overlay, /mutable_appearance, mutable_appearance('icons/g
 	blocks_emissive = EMISSIVE_BLOCK_GENERIC
 	pass_flags_self = PASSITEM
 	pass_flags = PASSTABLE
+	interaction_flags_click = NEED_HANDS | ALLOW_RESTING
 
 	move_resist = null // Set in the Initialise depending on the item size. Unless it's overriden by a specific item
 
@@ -23,6 +24,7 @@ GLOBAL_DATUM_INIT(fire_overlay, /mutable_appearance, mutable_appearance('icons/g
 	var/slot_flags_2 = NONE
 	/// This flag is used to determine when items in someone's inventory cover others. IE helmets making it so you can't see glasses, etc.
 	var/flags_inv = NONE
+	var/holder_flags = NONE
 	/// These flags will be added/removed (^=) to/from flags_inv in [/proc/check_obscured_slots()]
 	/// if check_transparent argument is set to `TRUE`. Used in carbon's update icons shenanigans.
 	/// Example: you can see someone's mask through their transparent visor, but you cannot reach it
@@ -202,6 +204,13 @@ GLOBAL_DATUM_INIT(fire_overlay, /mutable_appearance, mutable_appearance('icons/g
 	///Datum used in item pixel shift TGUI
 	var/datum/ui_module/item_pixel_shift/item_pixel_shift
 
+	/// Used in butchering of animals, set to TRUE for near instant butchering
+	var/has_speed_harvest = FALSE
+
+	/// How much to offset the item randomly either way alongside X visually
+	var/ground_offset_x = 0
+	/// How much to offset the item randomly either way alongside Y visually
+	var/ground_offset_y = 0
 
 /obj/item/Initialize(mapload)
 	. = ..()
@@ -215,7 +224,6 @@ GLOBAL_DATUM_INIT(fire_overlay, /mutable_appearance, mutable_appearance('icons/g
 
 		if(damtype == "brute")
 			hitsound = "swing_hit"
-
 	for(var/path in actions_types)
 		if(action_icon && action_icon_state)
 			new path(src, action_icon[path], action_icon_state[path])
@@ -227,6 +235,7 @@ GLOBAL_DATUM_INIT(fire_overlay, /mutable_appearance, mutable_appearance('icons/g
 		determine_move_resist()
 
 	add_eatable_component()
+	scatter_item()
 
 
 /obj/item/proc/add_eatable_component()
@@ -303,32 +312,32 @@ GLOBAL_DATUM_INIT(fire_overlay, /mutable_appearance, mutable_appearance('icons/g
 	. = ..(user, "", "Это предмет [size] размера.")
 
 	if(user.research_scanner || user.check_smart_brain()) //Mob has a research scanner active.
-		var/msg = "*--------* <BR>"
+		var/msg = "*--------* <br>"
 
 		if(origin_tech)
-			msg += "<span class='notice'>Testing potentials:</span><BR>"
+			msg += span_notice("Тестирование потенциалов:<br>")
 			var/list/techlvls = params2list(origin_tech)
 			for(var/T in techlvls) //This needs to use the better names.
-				msg += "Tech: [CallTechName(T)] | Magnitude: [techlvls[T]] <BR>"
+				msg += "Технология: [CallTechName(T)] | Уровень: [techlvls[T]] <br>"
 		else
-			msg += "<span class='danger'>No tech origins detected.</span><BR>"
+			msg += span_danger("Технологические источники не обнаружены.<br>")
 
 
 		if(length(materials))
-			msg += "<span class='notice'>Extractable materials:<BR>"
+			msg += span_notice("Извлекаемые материалы:<br>")
 			for(var/mat in materials)
-				msg += "[CallMaterialName(mat)]<BR>" //Capitize first word, remove the "$"
+				msg += "[CallMaterialName(mat)]<br>" //Capitize first word, remove the "$"
 		else
-			msg += "<span class='danger'>No extractable materials detected.</span><BR>"
+			msg += span_danger("Пригодные материалы отсутствуют.<br>")
 		msg += "*--------*"
 		. += msg
 
 	if(isclocker(user) && enchant_type)
 		if(enchant_type == CASTING_SPELL)
-			. += "<span class='notice'>The last spell hasn't expired yet!</span><BR>"
+			. += span_notice("Предыдущее заклинание еще активно!<br>")
 		for(var/datum/spell_enchant/S in enchants)
 			if(S.enchantment == enchant_type)
-				. += "<span class='notice'>It has a sealed spell \"[S.name]\" inside.</span><BR>"
+				. += span_notice("Обнаружено запечатанное заклинание \"[S.name]\" внутри.<br>")
 				break
 
 
@@ -336,7 +345,7 @@ GLOBAL_DATUM_INIT(fire_overlay, /mutable_appearance, mutable_appearance('icons/g
 	if(!QDELETED(src))
 		var/turf/T = get_turf(src)
 		var/obj/effect/decal/cleanable/ash/A = new(T)
-		A.desc += "\nLooks like this used to be \an [name] some time ago."
+		A.desc += "\nПохоже, когда-то это было [src.declent_ru(INSTRUMENTAL)]."
 		..()
 
 
@@ -346,7 +355,7 @@ GLOBAL_DATUM_INIT(fire_overlay, /mutable_appearance, mutable_appearance('icons/g
 		var/obj/effect/decal/cleanable/molten_object/MO = new(T)
 		MO.pixel_x = rand(-16,16)
 		MO.pixel_y = rand(-16,16)
-		MO.desc = "Looks like this was \an [src] some time ago."
+		MO.desc = "Похоже, когда-то это было [src.declent_ru(INSTRUMENTAL)]."
 		..()
 
 
@@ -367,9 +376,11 @@ GLOBAL_DATUM_INIT(fire_overlay, /mutable_appearance, mutable_appearance('icons/g
 		if(istype(H))
 			if(H.gloves && (H.gloves.max_heat_protection_temperature > 360))
 				extinguish()
-				to_chat(user, span_notice("You put out the fire on [src]."))
+				to_chat(user, span_notice("Вы тушите пламя на [src.declent_ru(PREPOSITIONAL)]."))
+				balloon_alert(user, "потушено")
 			else
-				to_chat(user, span_warning("You burn your hand on [src]!"))
+				to_chat(user, span_warning("Вы обжигаете руку о [src.declent_ru(ACCUSATIVE)]!"))
+				balloon_alert(user, "горячо!")
 				H.apply_damage(5, BURN, def_zone = H.hand ? BODY_ZONE_L_ARM : BODY_ZONE_R_ARM)	// 5 burn damage
 				return
 		else
@@ -379,7 +390,7 @@ GLOBAL_DATUM_INIT(fire_overlay, /mutable_appearance, mutable_appearance('icons/g
 		var/mob/living/carbon/human/H = user
 		if(istype(H))
 			if(!H.gloves || (!(H.gloves.resistance_flags & (UNACIDABLE|ACID_PROOF))))
-				to_chat(user, span_warning("The acid on [src] burns your hand!"))
+				to_chat(user, span_warning("Кислота на [src.declent_ru(PREPOSITIONAL)] прожигает вашу руку!"))
 				H.apply_damage(5, BURN, def_zone = H.hand ? BODY_ZONE_L_ARM : BODY_ZONE_R_ARM)	// 5 burn damage
 
 	if(throwing)
@@ -395,10 +406,10 @@ GLOBAL_DATUM_INIT(fire_overlay, /mutable_appearance, mutable_appearance('icons/g
 		// inventory unequip delay
 		if(equip_delay_self > 0 && !user.is_general_slot(user.get_slot_by_item(src)))
 			user.visible_message(
-				span_notice("[user] начинает снимать [name]..."),
-				span_notice("Вы начинаете снимать [name]..."),
+				span_notice("[user] начинает снимать [declent_ru(ACCUSATIVE)]..."),
+				span_notice("Вы начинаете снимать [declent_ru(ACCUSATIVE)]..."),
 			)
-			if(!do_after(user, equip_delay_self, user, max_interact_count = 1, cancel_on_max = TRUE, cancel_message = span_warning("Снятие [name] было прервано!")))
+			if(!do_after(user, equip_delay_self, user, max_interact_count = 1, cancel_on_max = TRUE, cancel_message = span_warning("Снятие [declent_ru(GENITIVE)] было прервано!")))
 				return
 
 		if(!user.temporarily_remove_item_from_inventory(src, silent = FALSE))
@@ -434,11 +445,11 @@ GLOBAL_DATUM_INIT(fire_overlay, /mutable_appearance, mutable_appearance('icons/g
 	var/mob/living/carbon/alien/A = user
 
 	if(!A.has_fine_manipulation)
-		to_chat(user, span_warning("Your claws aren't capable of such fine manipulation!"))
+		to_chat(user, span_warning("Ваши когти не способны к такой точной работе!"))
 		return
 
 	if(!allowed_for_alien())
-		to_chat(user, span_warning("Looks like [src] has no use for me!"))
+		to_chat(user, span_warning("Похоже, [src.declent_ru(NOMINATIVE)] мне бесполезен!"))
 		return
 
 	attack_hand(A)
@@ -476,13 +487,13 @@ GLOBAL_DATUM_INIT(fire_overlay, /mutable_appearance, mutable_appearance('icons/g
 				storage.handle_item_insertion(item, prevent_warning = TRUE)
 			if(success && !failure)
 				playsound(loc, 'sound/items/handling/generic_pickup3.ogg', PICKUP_SOUND_VOLUME, channel = CHANNEL_INTERACTION_SOUNDS, ignore_walls = FALSE)
-				to_chat(user, span_notice("You put everything in [storage]."))
+				to_chat(user, span_notice("Вы [pick(list("помещаете", "складываете", "кладёте"))] все в [storage.declent_ru(ACCUSATIVE)]."))
 				return ATTACK_CHAIN_BLOCKED_ALL
 			if(success)
 				playsound(loc, 'sound/items/handling/generic_pickup3.ogg', PICKUP_SOUND_VOLUME, channel = CHANNEL_INTERACTION_SOUNDS, ignore_walls = FALSE)
-				to_chat(user, span_notice("You put some things in [storage]."))
+				to_chat(user, span_notice("Вы [pick(list("помещаете", "складываете", "кладёте"))] что-то в [storage.declent_ru(ACCUSATIVE)]."))
 				return ATTACK_CHAIN_BLOCKED_ALL
-			to_chat(user, span_notice("You fail to pick up anything with [storage]."))
+			to_chat(user, span_notice("Вам не удалось ничего взять с помощью [storage.declent_ru(GENITIVE)]."))
 			return ATTACK_CHAIN_PROCEED
 
 		if(storage.can_be_inserted(src))
@@ -503,12 +514,12 @@ GLOBAL_DATUM_INIT(fire_overlay, /mutable_appearance, mutable_appearance('icons/g
 		var/y_offset = text2num(clickparams["icon-y"])
 		add_fingerprint(user)
 		if(GetComponent(/datum/component/ducttape))
-			to_chat(user, span_notice("[src] already has some tape attached!"))
+			to_chat(user, span_notice("На [src.declent_ru(PREPOSITIONAL)] уже есть изолента!"))
 			return ATTACK_CHAIN_PROCEED
 		if(!tape.use(1))
-			to_chat(user, span_notice("You don't have enough tape to do that!"))
+			to_chat(user, span_notice("У вас недостаточно изоленты!"))
 			return ATTACK_CHAIN_PROCEED
-		to_chat(user, span_notice("You apply some tape to [src]."))
+		to_chat(user, span_notice("Вы прикрепляете изоленту к [src.declent_ru(DATIVE)]."))
 		AddComponent(/datum/component/ducttape, x_offset, y_offset)
 		return ATTACK_CHAIN_PROCEED_SUCCESS
 
@@ -520,7 +531,7 @@ GLOBAL_DATUM_INIT(fire_overlay, /mutable_appearance, mutable_appearance('icons/g
 		final_block_chance = 0
 	var/signal_result = (SEND_SIGNAL(src, COMSIG_ITEM_HIT_REACT, owner, hitby, damage, attack_type) & COMPONENT_BLOCK_SUCCESSFUL) + prob(final_block_chance)
 	if(signal_result != 0)
-		owner.visible_message(span_danger("[owner] блокиру[pluralize_ru(owner.gender, "ет", "ют")] [attack_text] с помощью [declent_ru(GENITIVE)]!"))
+		owner.visible_message(span_danger("[owner] блокиру[pluralize_ru(owner.gender, "ет", "ют")] [attack_text] с помощью [declent_ru(GENITIVE)]!"), projectile_message = (attack_type == PROJECTILE_ATTACK))
 		return signal_result
 	return FALSE
 
@@ -728,7 +739,7 @@ GLOBAL_DATUM_INIT(fire_overlay, /mutable_appearance, mutable_appearance('icons/g
 
 	if(equip_delay_self > 0)
 		if(!silent)
-			to_chat(user, span_warning("Вы должны экипировать [name] вручную!"))
+			to_chat(user, span_warning("Вы должны экипировать [declent_ru(ACCUSATIVE)] вручную!"))
 		return FALSE
 
 	//If storage is active - insert there
@@ -749,8 +760,6 @@ GLOBAL_DATUM_INIT(fire_overlay, /mutable_appearance, mutable_appearance('icons/g
 		if(container.can_be_inserted(src, TRUE))
 			return container.handle_item_insertion(src)
 
-	var/our_name = name
-
 	if(drop_on_fail)
 		if(src in user.get_equipped_items(include_pockets = TRUE, include_hands = TRUE))
 			user.drop_item_ground(src)
@@ -763,7 +772,7 @@ GLOBAL_DATUM_INIT(fire_overlay, /mutable_appearance, mutable_appearance('icons/g
 		qdel(src)
 
 	if(!silent)
-		to_chat(user, span_warning("Вы не можете надеть [our_name]!"))
+		to_chat(user, span_warning("Вы не можете надеть [declent_ru(ACCUSATIVE)]!"))
 
 	return FALSE
 
@@ -775,7 +784,8 @@ GLOBAL_DATUM_INIT(fire_overlay, /mutable_appearance, mutable_appearance('icons/g
 	// if an item is already on user you cannot reequip it anywhere if it has NODROP trait
 	if(loc == user && HAS_TRAIT(src, TRAIT_NODROP))
 		if(!silent)
-			to_chat(user, span_warning("Неведомая сила не позволяет Вам надеть [name]."))
+			//cringe momemt
+			to_chat(user, span_warning("Неведомая сила не позволяет Вам надеть [declent_ru(ACCUSATIVE)]."))
 		return FALSE
 	return TRUE
 
@@ -803,7 +813,7 @@ GLOBAL_DATUM_INIT(fire_overlay, /mutable_appearance, mutable_appearance('icons/g
 	if(usr.incapacitated() || !isturf(loc) || !Adjacent(usr))
 		return
 	if(!iscarbon(usr))
-		to_chat(usr, span_warning("You can't pick things up!"))
+		to_chat(usr, span_warning("Вы не можете поднимать предметы!"))
 		return
 	usr.UnarmedAttack(src)
 
@@ -837,7 +847,7 @@ GLOBAL_DATUM_INIT(fire_overlay, /mutable_appearance, mutable_appearance('icons/g
 	. = ATTACK_CHAIN_PROCEED
 
 	if(isalien(target) || isslime(target))//Aliens don't have eyes. slimes also don't have eyes!
-		to_chat(user, span_warning("You cannot locate any eyes on this creature!"))
+		to_chat(user, span_warning("Вы не можете найти глаз у этого существа!"))
 		return .
 
 	var/target_is_human = ishuman(target)
@@ -847,7 +857,7 @@ GLOBAL_DATUM_INIT(fire_overlay, /mutable_appearance, mutable_appearance('icons/g
 		(target.wear_mask && target.wear_mask.flags_cover & MASKCOVERSEYES) || \
 		(target.glasses && target.glasses.flags_cover & GLASSESCOVERSEYES))
 		// you can't stab someone in the eyes wearing a mask!
-		to_chat(user, span_danger("You're going to need to remove that mask/helmet/glasses first!"))
+		to_chat(user, span_danger("Сначала нужно снять маску/шлем/очки!"))
 		return .
 
 	. |= ATTACK_CHAIN_SUCCESS
@@ -863,13 +873,13 @@ GLOBAL_DATUM_INIT(fire_overlay, /mutable_appearance, mutable_appearance('icons/g
 
 	if(target != user)
 		target.visible_message(
-			span_danger("[user] has stabbed [target] in the eye with [src]!"),
-			span_userdanger("[user] stabs you in the eye with [src]!"),
+			span_danger("[user] вонза[pluralize_ru(user.gender,"ет","ют")] [src.declent_ru(ACCUSATIVE)] в глаз [target]!"),
+			span_userdanger("[user] вонзает [src.declent_ru(ACCUSATIVE)] вам в глаз!"),
 		)
 	else
 		user.visible_message(
-			span_danger("[user] has stabbed [user.p_them()]self in the eyes with [src]!"),
-			span_userdanger("You stab yourself in the eyes with [src]!"),
+			span_danger("[user] вонза[pluralize_ru(user.gender,"ет","ют")] [src.declent_ru(ACCUSATIVE)] себе в глаза!"),
+			span_userdanger("Вы вонзаете [src.declent_ru(ACCUSATIVE)] себе в глаза!"),
 		)
 
 	add_attack_logs(user, target, "Eye-stabbed with [src] ([uppertext(user.a_intent)])")
@@ -884,14 +894,14 @@ GLOBAL_DATUM_INIT(fire_overlay, /mutable_appearance, mutable_appearance('icons/g
 
 		if(eyes.damage >= eyes.min_bruised_damage)
 			if(target.stat != DEAD && !eyes.is_robotic())	//robot eyes bleeding might be a bit silly
-				to_chat(target, span_danger("Your eyes start to bleed profusely!"))
+				to_chat(target, span_danger("Из ваших глаз начинает хлестать кровь!"))
 			if(prob(50))
 				if(target.stat != DEAD)
-					to_chat(target, span_danger("You drop what you're holding and clutch at your eyes!"))
+					to_chat(target, span_danger("Вы роняете предметы и хватаетесь за глаза!"))
 				target.AdjustEyeBlurry(20 SECONDS)
 				target.Paralyse(2 SECONDS)
 			if(eyes.damage >= eyes.min_broken_damage && target.stat != DEAD)
-				to_chat(target, span_danger("You go blind!"))
+				to_chat(target, span_danger("Вы слепнете!"))
 
 		target.apply_damage(7, def_zone = BODY_ZONE_HEAD)
 		target.AdjustEyeBlurry(rand(6 SECONDS, 8 SECONDS))
@@ -976,13 +986,15 @@ GLOBAL_DATUM_INIT(fire_overlay, /mutable_appearance, mutable_appearance('icons/g
 /obj/item/proc/wash(mob/user, atom/source)
 	if(item_flags & ABSTRACT) //Abstract items like grabs won't wash. No-drop items will though because it's still technically an item in your hand.
 		return
-	to_chat(user, "<span class='notice'>You start washing [src]...</span>")
+	to_chat(user, span_notice("Вы начинаете мыть [src.declent_ru(ACCUSATIVE)]..."))
 	if(!do_after(user, 4 SECONDS, source))
 		return
 	clean_blood()
 	acid_level = 0
-	user.visible_message("<span class='notice'>[user] washes [src] using [source].</span>", \
-						"<span class='notice'>You wash [src] using [source].</span>")
+	user.visible_message(
+		span_notice("[user] мо[pluralize_ru(user.gender,"ет","ют")] [src.declent_ru(ACCUSATIVE)] с помощью [source.declent_ru(GENITIVE)]."),
+		span_notice("Вы моете [src.declent_ru(ACCUSATIVE)] с помощью [source.declent_ru(GENITIVE)].")
+	)
 	return TRUE
 
 
@@ -1002,6 +1014,11 @@ GLOBAL_DATUM_INIT(fire_overlay, /mutable_appearance, mutable_appearance('icons/g
 
 /obj/item/attack_animal(mob/living/simple_animal/M)
 	if(!(obj_flags & IGNORE_HITS))
+		return ..()
+	return FALSE
+
+/obj/item/attack_basic_mob(mob/living/basic/user)
+	if(obj_flags & IGNORE_HITS)
 		return ..()
 	return FALSE
 
@@ -1051,22 +1068,22 @@ GLOBAL_DATUM_INIT(fire_overlay, /mutable_appearance, mutable_appearance('icons/g
 /obj/item/proc/apply_outline(mob/user, outline_color = null)
 	if(!(item_flags & (IN_INVENTORY|IN_STORAGE)) || QDELETED(src) || isobserver(user)) //cancel if the item isn't in an inventory, is being deleted, or if the person hovering is a ghost (so that people spectating you don't randomly make your items glow)
 		return
-	var/theme = lowertext(user.client.prefs.UI_style)
+	var/theme = user.client.prefs.UI_style
 	if(!outline_color) //if we weren't provided with a color, take the theme's color
 		switch(theme) //yeah it kinda has to be this way
-			if("midnight")
+			if(UI_THEME_MIDNIGHT)
 				outline_color = COLOR_THEME_MIDNIGHT
-			if("plasmafire")
+			if(UI_THEME_PLASMAFIRE)
 				outline_color = COLOR_THEME_PLASMAFIRE
-			if("retro")
+			if(UI_THEME_RETRO)
 				outline_color = COLOR_THEME_RETRO //just as garish as the rest of this theme
-			if("slimecore")
+			if(UI_THEME_SLIMECORE)
 				outline_color = COLOR_THEME_SLIMECORE
-			if("operative")
+			if(UI_THEME_OPERATIVE)
 				outline_color = COLOR_THEME_OPERATIVE
-			if("clockwork")
+			if(UI_THEME_CLOCKWORK)
 				outline_color = COLOR_THEME_CLOCKWORK //if you want free gbp go fix the fact that clockwork's tooltip css is glass'
-			if("glass")
+			if(UI_THEME_GLASS)
 				outline_color = COLOR_THEME_GLASS
 			else //this should never happen, hopefully
 				outline_color = COLOR_WHITE
@@ -1233,7 +1250,7 @@ GLOBAL_DATUM_INIT(fire_overlay, /mutable_appearance, mutable_appearance('icons/g
 	if(get_turf(src) == get_turf(target))	// No need for pickup animation if item is on user or on the same turf
 		return
 
-	var/image/transfer_animation = image(icon = src, loc = src.loc, layer = MOB_LAYER + 0.1)
+	var/image/transfer_animation = image(icon = src, layer = ABOVE_MOB_LAYER)
 	SET_PLANE(transfer_animation, GAME_PLANE, loc)
 	transfer_animation.transform.Scale(0.75)
 	transfer_animation.appearance_flags = APPEARANCE_UI_IGNORE_ALPHA
@@ -1254,13 +1271,14 @@ GLOBAL_DATUM_INIT(fire_overlay, /mutable_appearance, mutable_appearance('icons/g
 		target_y += 10
 		transfer_animation.pixel_x += 6 * (prob(50) ? 1 : -1)
 
-	flick_overlay_view(transfer_animation, 4)
-	var/matrix/animation_matrix = new(transfer_animation.transform)
+	var/atom/movable/flick_visual/pickup = src.loc.flick_overlay_view(transfer_animation, 0.4 SECONDS)
+	var/matrix/animation_matrix = new(pickup.transform)
 	animation_matrix.Turn(pick(-30, 30))
 	animation_matrix.Scale(0.65)
 
-	animate(transfer_animation, alpha = 175, pixel_x = target_x, pixel_y = target_y, time = 3, transform = animation_matrix, easing = CUBIC_EASING)
-	animate(alpha = 0, transform = matrix().Scale(0.7), time = 1)
+
+	animate(pickup, alpha = 175, pixel_x = target_x, pixel_y = target_y, time = 0.3 SECONDS, transform = animation_matrix, easing = CUBIC_EASING)
+	animate(alpha = 0, transform = matrix().Scale(0.7), time = 0.1 SECONDS)
 
 
 /obj/item/proc/do_drop_animation(atom/moving_from)
@@ -1301,6 +1319,7 @@ GLOBAL_DATUM_INIT(fire_overlay, /mutable_appearance, mutable_appearance('icons/g
 	alpha = 0
 	transform = animation_matrix
 
+	SEND_SIGNAL(src, COMSIG_ATOM_TEMPORARY_ANIMATION_START, 3)
 	// This is instant on byond's end, but to our clients this looks like a quick drop
 	animate(src, alpha = old_alpha, pixel_x = old_x, pixel_y = old_y, transform = old_transform, time = 3, easing = CUBIC_EASING)
 
@@ -1342,3 +1361,20 @@ GLOBAL_DATUM_INIT(fire_overlay, /mutable_appearance, mutable_appearance('icons/g
 		to_chat(src, span_notice("Вы осторожно опускаете [declent_ru(ACCUSATIVE)] на землю."))
 		return
 	return src
+
+/obj/item/proc/scatter_item()
+	if(!pixel_x && !pixel_y)
+		pixel_x = rand(-ground_offset_x, ground_offset_x)
+		pixel_y = rand(-ground_offset_y, ground_offset_y)
+
+/**
+ * Global item proc for all of your unique item skin needs. Works with any
+ * item, and will change the skin to whatever you specify here. You can also
+ * manually override the icon with a unique skin if wanted, for the outlier
+ * cases. Override_icon_state should be a list. Generally requires NO_GAMEMODE_SKIN
+ * to not be set for changes to be applied.
+ *
+ * Returns whether changes were applied.
+ */
+/obj/item/proc/select_skin(new_skin)
+	return

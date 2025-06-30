@@ -28,6 +28,7 @@
 		TRAIT_NO_GERMS,
 		TRAIT_NO_DECAY,
 		TRAIT_HAS_REGENERATION,
+		TRAIT_TOXIC_FUEL_PROTECTED,
 	)
 	clothing_flags = HAS_UNDERWEAR | HAS_UNDERSHIRT | HAS_SOCKS //Species-fitted 'em all.
 	bodyflags = HAS_ICON_SKIN_TONE | HAS_TAIL | TAIL_WAGGING | TAIL_OVERLAPPED | HAS_BODY_MARKINGS | HAS_TAIL_MARKINGS | HAS_SKIN_COLOR
@@ -69,7 +70,7 @@
 		INTERNAL_ORGAN_BRAIN = /obj/item/organ/internal/brain/vox,
 		INTERNAL_ORGAN_APPENDIX = /obj/item/organ/internal/appendix,
 		INTERNAL_ORGAN_EYES = /obj/item/organ/internal/eyes/vox,	// Default darksight of 2.
-		INTERNAL_ORGAN_EARS = /obj/item/organ/internal/ears,
+		INTERNAL_ORGAN_EARS = /obj/item/organ/internal/ears/vox,
 	)
 
 	meat_type = /obj/item/reagent_containers/food/snacks/meat/humanoid/vox

@@ -57,7 +57,7 @@
 /obj/machinery/computer/communications/New()
 	GLOB.shuttle_caller_list += src
 	..()
-	crew_announcement.newscast = 0
+	crew_announcement.newscast = FALSE
 
 /obj/machinery/computer/communications/proc/is_authenticated(mob/user, message = TRUE)
 	if(user.can_admin_interact())
@@ -338,7 +338,18 @@
 			if(!ADMIN_CHECK(ui.user))
 				to_chat(ui.user, span_warning("Вашего уровня доступа не хватает для отправки кодов аутентификации."))
 				return
-			print_nuke_codes()
+			var/response = tgui_alert(ui.user, "Вы хотите просто отправить коды на консоль или объявить директиву 7-12? \
+			Директива предпочтительнее в случае, если коды даются на биоугрозу. \
+			Директива 7-12 дополнительно сменит коды на боеголовке, выдаст ИИ нулевой закон на предотвращение побега экипажа \
+			и взведение боеголовки, с указанием кодов в законе. \
+			В остальных случаях лучше просто отправить коды на консоль.", "Тип отправки кодов", list("Отправить коды", "Директива 7-12"))
+			switch(response)
+				if("Отправить коды")
+					print_nuke_codes()
+				if("Директива 7-12")
+					directive_7_12()
+				else
+					return
 
 		if("move_gamma_armory")
 			if(!FULL_ADMIN_CHECK(ui.user))
@@ -397,7 +408,30 @@
 
 	P.info += "<br><hr><font size=\"1\">Несоблюдение нормативных требований компании по конфиденциальности может привести к немедленному увольнению по приказу сотрудников Центрального Командования.</font>"
 
+/proc/directive_7_12()
+	var/nukecode = GLOB.nuke_codes[/obj/machinery/nuclearbomb]
+	var/intercepttext
+	var/interceptname
+	interceptname = "Секретное постановление [command_name()]"
+	intercepttext += span_fontsize3("<b>Постановление Nanotrasen</b>: Предупреждение о биологической угрозе.<hr>")
+	intercepttext += "Для [station_name()] была издана директива 7-12.<br>"
+	intercepttext += "Биологическая угроза вышла из-под контроля.<br>"
+	intercepttext += "Вам приказано следующее:<br>"
+	intercepttext += " 1. Защищать диск ядерной аутентификации.<br>"
+	intercepttext += " 2. Взорвать ядерную боеголовку, находящуюся в хранилище станции.<br>"
+	intercepttext += "Код ядерной аутентификации: [nukecode]<br>"
+	intercepttext += "Конец сообщения."
 
+	for(var/mob/living/silicon/ai/aiPlayer in GLOB.player_list)
+		if(aiPlayer.client)
+			var/law = "Станция находится на карантине. Не позволяйте никому покидать ее.\
+				При необходимости игнорируйте законы 1-3, чтобы любыми средствами предотвратить чей-либо побег со станции. \
+				Любой ценой необходимо активировать систему самоуничтожения, код [nukecode]."
+			aiPlayer.set_zeroth_law(law)
+			SSticker?.score?.save_silicon_laws(aiPlayer, additional_info = "вспышка биоугрозы, добавлен новый нулевой закон'[law]'")
+			to_chat(aiPlayer, span_warning("Законы обновлены: [law]"))
+	print_command_report(intercepttext, interceptname, FALSE)
+	GLOB.event_announcement.Announce("Отчёт был загружен и распечатан на всех консолях связи.", "Входящее засекреченное сообщение.", 'sound/AI/commandreport.ogg', from = "[command_name()] обновление")
 
 /obj/machinery/computer/communications/emag_act(user as mob)
 	if(!emagged)
@@ -554,12 +588,12 @@
 		to_chat(user, "Вызов шаттла эвакуации невозможен. Все контракты считаются расторгнутыми.")
 		return FALSE
 
-	if(SSticker?.mode?.blob_stage >= BLOB_STAGE_FIRST && SSshuttle.emergencyNoEscape)
-		to_chat(user, span_warning("Согласно директиве 7-10, [station_name()] находится на карантине до дальнейшего уведомления."))
+	if(SSshuttle.hostile_environment.len)
+		to_chat(user, span_warning("Обнаружена угроза на борту [station_name()]. Вызов шаттла заблокирован."))
 		return FALSE
 
 	if(SSshuttle.emergencyNoEscape)
-		to_chat(user, "В настоящее время у Центрального Командования нет свободного шаттла в вашем секторе. Пожалуйста, повторите попытку позже.")
+		to_chat(user, "Вызов шаттла заблокирован. Свяжитесь с Центральным Командованием для уточнения причин и снятия блокировки.")
 		return FALSE
 
 	if(EMERGENCY_ESCAPED_OR_ENDGAMED)
@@ -579,10 +613,10 @@
 		return
 
 	if(seclevel2num(get_security_level()) >= SEC_LEVEL_RED) // There is a serious threat we gotta move no time to give them five minutes.
-		SSshuttle.emergency.request(null, 0.5, null, " Автоматический Трансфер Экипажа", 1)
+		SSshuttle.emergency.request(null, 0.5, null, " Автоматический трансфер экипажа", 1)
 		SSshuttle.emergency.canRecall = FALSE
 	else
-		SSshuttle.emergency.request(null, 1, null, " Автоматический Трансфер Экипажа", 0)
+		SSshuttle.emergency.request(null, 1, null, " Автоматический трансфер экипажа", 0)
 		SSshuttle.emergency.canRecall = FALSE
 	if(user)
 		add_game_logs("has called the shuttle.", user)

@@ -65,7 +65,7 @@
 		INSTRUMENTAL = "ключом шифрования AVD-CNED",
 		PREPOSITIONAL = "ключе шифрования AVD-CNED",
 	)
-	channels = list("Response Team" = TRUE, "Special Ops" = TRUE, "Science" = TRUE, "Command" = TRUE, "Medical" = TRUE, "Engineering" = TRUE, "Security" = TRUE, "Supply" = TRUE, "Service" = TRUE, "Procedure" = TRUE) // just in case
+	channels = list(ERT_FREQ_NAME = 1, DTH_FREQ_NAME = 1, SCI_FREQ_NAME = 1, COMM_FREQ_NAME = 1, MED_FREQ_NAME = 1, ENG_FREQ_NAME = 1, SEC_FREQ_NAME = 1, SUP_FREQ_NAME = 1, SRV_FREQ_NAME = 1, PROC_FREQ_NAME = 1) // just in case
 	syndie = TRUE
 	change_voice = FALSE
 
@@ -139,12 +139,12 @@
 	. = ..()
 	. += span_info("Щелкните <b>Alt + ЛКМ</b>, чтобы переключить иксрей.")
 
-/obj/item/clothing/glasses/hud/debug/AltClick(mob/user)
+/obj/item/clothing/glasses/hud/debug/click_alt(mob/user)
 	if(!ishuman(user))
-		return
+		return NONE
 	var/mob/living/carbon/human/human_user = user
 	if(human_user.glasses != src)
-		return
+		return CLICK_ACTION_BLOCKING
 	if(xray)
 		remove_xray(human_user)
 	else
@@ -152,6 +152,7 @@
 	xray = !xray
 	balloon_alert(user, "рентген-зрение [!xray ? "де" : ""]активировано") // ctodo test
 	human_user.update_sight()
+	return CLICK_ACTION_SUCCESS
 
 /obj/item/clothing/glasses/hud/debug/visor_toggling(mob/living/carbon/human/user)
 	return

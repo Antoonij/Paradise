@@ -141,7 +141,7 @@ SUBSYSTEM_DEF(explosions)
 	if(!epicenter)
 		return FALSE
 
-	var/datum/explosion_data/data = new(epicenter, devastation_range, heavy_impact_range, light_impact_range, flash_range, ignorecap, flame_range, breach, multiz_explosions, protect_epicenter, explosion_direction, explosion_arc)
+	var/datum/explosion_data/data = new(get_turf(epicenter), devastation_range, heavy_impact_range, light_impact_range, flash_range, ignorecap, flame_range, breach, multiz_explosions, protect_epicenter, explosion_direction, explosion_arc)
 	INVOKE_ASYNC(src, PROC_REF(start_explosion), data, adminlog, cause, smoke, silent)
 
 	return TRUE
@@ -186,12 +186,11 @@ SUBSYSTEM_DEF(explosions)
 	var/list/cached_turf_exp_block = list()
 	var/list/cached_turf_vert_exp_block = list()
 	var/list/cached_exp_block = list()
-	var/list/epicenter_list = list()
 	var/watch
 
 /datum/explosion_data/New(turf/epicenter, devastation_range, heavy_impact_range, light_impact_range, flash_range, ignorecap = FALSE, flame_range = 0, breach = TRUE, multiz = FALSE, protect_epicenter = FALSE, explosion_direction = 0, explosion_arc = 360)
 	. = ..()
-	src.epicenter = get_turf(epicenter)
+	src.epicenter = epicenter
 	src.flame_range = flame_range
 	src.flash_range = flash_range
 	src.devastation_range = devastation_range
@@ -225,13 +224,10 @@ SUBSYSTEM_DEF(explosions)
 	far_dist += devastation_range * 20
 	if(!ignorecap)
 		clamp_ranges()
-	epicenter_list += epicenter
 	watch = start_watch()
 
 /datum/explosion_data/Destroy()
 	qdel(affected_turfs_queue)
-	LAZYCLEARLIST(epicenter_list)
-	LAZYNULL(epicenter_list)
 	LAZYCLEARLIST(cached_exp_block)
 	LAZYNULL(cached_exp_block)
 	LAZYCLEARLIST(cached_turf_exp_block)
@@ -346,18 +342,18 @@ SUBSYSTEM_DEF(explosions)
 				baseshakeamount = sqrt((orig_max_distance - dist) * 0.1)
 			// If inside the blast radius + world.view - 2
 			if(dist <= round(max_range + world.view - 2, 1))
-				M.playsound_local(epicenter, null, 100, 1, frequency, S = SSexplosions.explosion_sound)
+				M.playsound_local(epicenter, null, 100, 1, frequency, sound = SSexplosions.explosion_sound)
 				if(baseshakeamount > 0)
 					shake_camera(M, 25, clamp(baseshakeamount, 0, 10))
 			// You hear a far explosion if you're outside the blast radius. Small bombs shouldn't be heard all over the station.
 			else if(dist <= far_dist)
 				var/far_volume = clamp(far_dist / 2, FAR_LOWER, FAR_UPPER) // Volume is based on explosion size and dist
 				if(creaking_explosion)
-					M.playsound_local(epicenter, null, far_volume, 1, frequency, S = SSexplosions.creaking_explosion_sound, distance_multiplier = 0)
+					M.playsound_local(epicenter, null, far_volume, 1, frequency, sound = SSexplosions.creaking_explosion_sound, distance_multiplier = 0)
 				else if(prob(PROB_SOUND)) // Sound variety during meteor storm/tesloose/other bad event
-					M.playsound_local(epicenter, null, far_volume, 1, frequency, S = SSexplosions.far_explosion_sound, distance_multiplier = 0) // Far sound
+					M.playsound_local(epicenter, null, far_volume, 1, frequency, sound = SSexplosions.far_explosion_sound, distance_multiplier = 0) // Far sound
 				else
-					M.playsound_local(epicenter, null, far_volume, 1, frequency, S = SSexplosions.explosion_echo_sound, distance_multiplier = 0) // Echo sound
+					M.playsound_local(epicenter, null, far_volume, 1, frequency, sound = SSexplosions.explosion_echo_sound, distance_multiplier = 0) // Echo sound
 
 				if(baseshakeamount > 0 || devastation_range)
 					if(!baseshakeamount) // Devastating explosions rock the station and ground
@@ -369,7 +365,7 @@ SUBSYSTEM_DEF(explosions)
 					baseshakeamount = devastation_range
 					shake_camera(M, 10, clamp(baseshakeamount * 0.25, 0, SHAKE_CLAMP))
 					echo_volume = 60
-				M.playsound_local(epicenter, null, echo_volume, 1, frequency, S = SSexplosions.explosion_echo_sound, distance_multiplier = 0)
+				M.playsound_local(epicenter, null, echo_volume, 1, frequency, sound = SSexplosions.explosion_echo_sound, distance_multiplier = 0)
 
 			if(creaking_explosion) // 5 seconds after the bang, the station begins to creak
 				addtimer(CALLBACK(M, TYPE_PROC_REF(/mob, playsound_local), epicenter, null, rand(FREQ_LOWER, FREQ_UPPER), 1, frequency, null, null, FALSE, SSexplosions.hull_creaking_sound, 0), CREAK_DELAY)

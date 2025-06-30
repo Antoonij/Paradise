@@ -100,7 +100,7 @@
 
 /datum/antagonist/ninja/greet()
 	SEND_SOUND(owner.current, 'sound/ambience/antag/ninja_greeting.ogg')
-	to_chat(owner.current, "Я элитный наёмник в составе могущественного Клана Паука! <font color='red'><B>Космический Ниндзя!</B></font>")
+	to_chat(owner.current, "Я элитный наёмник в составе могущественного Клана Паука! <font color='red'><b>Космический Ниндзя!</b></font>")
 	to_chat(owner.current, "Моё оружие внезапность. Моя броня Тень. Без них, я ничто.")
 
 
@@ -371,7 +371,7 @@
 	for(var/datum/mind/traitor in pre_antags)
 		var/datum/antagonist/traitor/traitor_datum = new
 		traitor_datum.give_objectives = FALSE
-		traitor_datum.is_contractor = TRUE
+		traitor_datum.contractor_pending = new(traitor)
 		traitor.add_antag_datum(traitor_datum)
 
 		var/objective_amount = protect_objective ? CONFIG_GET(number/traitor_objectives_amount) - 1 : CONFIG_GET(number/traitor_objectives_amount)

@@ -23,6 +23,10 @@
 	//alt heads
 	init_sprite_accessory_subtypes(/datum/sprite_accessory/alt_heads, GLOB.alt_heads_list)
 
+	init_datum_subtypes(/datum/wryn_building, GLOB.wryn_structures, null, "name")
+
+	init_datum_subtypes(/datum/robot_skin, GLOB.robot_skins, null, "type")
+
 	init_subtypes(/datum/surgery_step, GLOB.surgery_steps)
 	init_subtypes(/obj/item/slimepotion, GLOB.slime_potions)
 	init_subtypes(/datum/preference_info, GLOB.preferences_info)
@@ -43,6 +47,8 @@
 	init_datum_subtypes(/datum/superheroes, GLOB.all_superheroes, null, "name")
 	init_datum_subtypes(/datum/language, GLOB.all_languages, null, "name")
 
+	init_datum_subtypes(/datum/devil_contract, GLOB.devil_contracts, list(/datum/devil_contract), "contract_type")
+
 	// Setup languages
 	for(var/language_name in GLOB.all_languages)
 		var/datum/language/language = GLOB.all_languages[language_name]
@@ -59,6 +65,9 @@
 		var/datum/species/S = new spath()
 		S.race_key = ++rkey //Used in mob icon caching.
 		GLOB.all_species[S.name] = S
+
+	for(var/spath in typesof(/obj/machinery/nuclearbomb))
+		GLOB.nuke_codes[spath] = rand(10000, 99999)
 
 	init_subtypes(/datum/crafting_recipe, GLOB.crafting_recipes)
 
@@ -153,10 +162,11 @@
 	init_keybindings()
 
 	// Preference toggles
-	for(var/path in subtypesof(/datum/preference_toggle))
-		var/datum/preference_toggle/pref_toggle = path
-		if(initial(pref_toggle.name))
-			GLOB.preference_toggles += new path()
+	for(var/datum/preference_toggle/pref_toggle as anything in subtypesof(/datum/preference_toggle))
+		if(!pref_toggle.name)
+			continue
+
+		GLOB.preference_toggles[pref_toggle] = new pref_toggle()
 
 	// Init chemical reagents
 	init_datum_subtypes(/datum/reagent, GLOB.chemical_reagents_list, null, "id")
@@ -394,4 +404,3 @@
 /proc/update_mob_config_movespeeds()
 	for(var/mob/M as anything in GLOB.mob_list)
 		M.update_config_movespeed()
-

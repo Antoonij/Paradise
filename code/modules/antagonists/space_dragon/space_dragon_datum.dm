@@ -162,7 +162,8 @@
 		rift.carp_stored = 999999
 		rift.time_charged = rift.max_charge
 	SSshuttle.emergency.canRecall = FALSE
-	SSshuttle.emergencyNoEscape = FALSE
+	SSshuttle.stop_lockdown()
+	SSshuttle.clear_hostile_environment()
 	if(EMERGENCY_AT_LEAST_DOCKED)
 		return
 	SSshuttle.emergency.request(coefficient = 0.5)
@@ -216,7 +217,7 @@
 	var/list/parts = list()
 	var/datum/objective/summon_carp/S = locate() in objectives
 	if(S.check_completion())
-		parts += "<span class='redtext big'>[name] - успех! Космические карпы вернули контроль над территорией расположения станции!</span>"
+		parts += span_redtext("<big>[name] - успех! Космические карпы вернули контроль над территорией расположения станции!</big>")
 	parts += printplayer(owner)
 	var/objectives_complete = TRUE
 	if(objectives.len)
@@ -226,11 +227,11 @@
 				objectives_complete = FALSE
 				break
 	if(objectives_complete)
-		parts += "<span class='greentext big'>[name] преуспел!</span>"
+		parts += span_greentext("<big>[name] преуспел!</big>")
 	else
-		parts += "<span class='redtext big'>[name] провалился!</span>"
+		parts += span_redtext("<big>[name] провалился!</big>")
 	if(carp.len)
-		parts += "<span class='header'>Помощниками [name] были:</span>"
+		parts += span_header("Помощниками [name] были:")
 		for(var/datum/mind/M in carp)
 			parts += "[printplayer(M)]"
 	return parts.Join("<br>")

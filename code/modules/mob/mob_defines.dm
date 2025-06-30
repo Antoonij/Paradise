@@ -138,6 +138,8 @@
 
 	var/in_throw_mode = FALSE
 
+	var/can_strip = TRUE
+
 	// See /datum/emote
 
 	/// Cooldown on audio effects from emotes.
@@ -224,8 +226,6 @@
 	//Ghosted var, set only if a player has manually ghosted out of this mob.
 	var/player_ghosted = 0
 
-	var/turf/listed_turf = null  //the current turf being examined in the stat panel
-
 	var/list/active_genes
 
 	var/last_movement = -100 // Last world.time the mob actually moved of its own accord.
@@ -256,6 +256,7 @@
 	var/last_emote = null
 
 	var/ghost_orbiting = 0
+	var/list/inventory_observers = null
 
 	/// List of movement speed modifiers applying to this mob
 	var/list/movespeed_modification //Lazy list, see mob_movespeed.dm

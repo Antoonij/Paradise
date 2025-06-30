@@ -67,8 +67,9 @@
 #define PREFTOGGLE_2_DESC_TIPS						(1<<20) // 1048576
 #define PREFTOGGLE_2_GIB_WITHOUT_OBJECTIVE			(1<<21) // 2097152
 #define PREFTOGGLE_2_SPLIT_ADMIN_TABS 				(1<<22) // 4194304
+#define PREFTOGGLE_2_OFF_PROJECTILE_MESSAGES		(1<<23) // 8388608
 
-#define TOGGLES_2_TOTAL								8388607 // If you add or remove a preference toggle above, make sure you update this define with the total value of the toggles combined.
+#define TOGGLES_2_TOTAL								16777215 // If you add or remove a preference toggle above, make sure you update this define with the total value of the toggles combined.
 
 #define TOGGLES_2_DEFAULT (PREFTOGGLE_2_FANCYUI|PREFTOGGLE_2_ITEMATTACK|PREFTOGGLE_2_WINDOWFLASHING|PREFTOGGLE_2_RUNECHAT|PREFTOGGLE_2_DEATHMESSAGE|PREFTOGGLE_2_SEE_ITEM_OUTLINES|PREFTOGGLE_2_PARALLAX_MULTIZ|PREFTOGGLE_2_SWAP_INPUT_BUTTONS|PREFTOGGLE_2_LARGE_INPUT_BUTTONS|PREFTOGGLE_2_DESC_TIPS)
 
@@ -79,6 +80,18 @@
 
 #if TOGGLES_2_TOTAL > 16777215
 #error toggles_2 bitflag over 16777215. Please make an issue report and postpone the feature you are working on.
+#endif
+
+#define PREFTOGGLE_3_DNR_AFTER_DEATH         	(1<<0) // 1
+#define PREFTOGGLE_3_UI_SCALE         			(1<<1) // 2
+#define PREFTOGGLE_3_FACING_TO_MOUSE			(1<<2) // 4
+
+#define TOGGLES_3_TOTAL                       	7 // If you add or remove a preference toggle above, make sure you update this define with the total value of the toggles combined.
+
+#define TOGGLES_3_DEFAULT (PREFTOGGLE_3_FACING_TO_MOUSE)
+
+#if TOGGLES_3_TOTAL > 16777215
+#error toggles_3 bitflag over 16777215. Please make an issue report and postpone the feature you are working on.
 #endif
 
 // This is a list index. Required to start at 1 instead of 0 so it's properly placed in the list
@@ -98,6 +111,8 @@
 #define PREFTOGGLE_TOGGLE1		3
 /// Interacts with the toggles2 bitflag
 #define PREFTOGGLE_TOGGLE2		4
+/// Interacts with the toggles3 bitflag
+#define PREFTOGGLE_TOGGLE3		5
 
 
 // Admin attack logs filter system, see /proc/add_attack_logs
@@ -151,3 +166,63 @@
 #define MULTIZ_DETAIL_HIGH 2
 #define MULTIZ_DETAIL_MEDIUM 1
 #define MULTIZ_DETAIL_LOW 0
+
+
+// Categories
+#define PREF_CATEGORY_GENERAL 		"Основные настройки"
+#define PREF_CATEGORY_LIVING 		"Настройки в раунде"
+#define PREF_CATEGORY_GHOST 		"Настройки призраков"
+#define PREF_CATEGORY_ADMIN 		"Настройки администрации"
+
+// Uplink location
+#define PREF_UPLINK_PDA 			"КПК"
+#define PREF_UPLINK_HEADSET 		"Гарнитура"
+
+// NanoTrasen relationship
+#define PREF_NTRELATION_LOYAL 		"Преданное"
+#define PREF_NTRELATION_SUPPORTIVE 	"Поддерживающее"
+#define PREF_NTRELATION_NEUTRAL 	"Нейтральное"
+#define PREF_NTRELATION_SCEPTICAL 	"Скептичное"
+#define PREF_NTRELATION_OPPOSED 	"Враждебное"
+
+// Bodyparts names
+#define PREF_ORGANNAME_CHEST 		"Грудь"
+#define PREF_ORGANNAME_GROIN 		"Живот"
+#define PREF_ORGANNAME_HEAD 		"Голова"
+#define PREF_ORGANNAME_L_ARM 		"Левая рука"
+#define PREF_ORGANNAME_R_ARM 		"Правая рука"
+#define PREF_ORGANNAME_L_HAND 		"Левая ладонь"
+#define PREF_ORGANNAME_R_HAND 		"Правая ладонь"
+#define PREF_ORGANNAME_L_LEG 		"Левая нога"
+#define PREF_ORGANNAME_R_LEG 		"Правая нога"
+#define PREF_ORGANNAME_L_FOOT 		"Левая ступня"
+#define PREF_ORGANNAME_R_FOOT 		"Правая ступня"
+
+// Organ names
+#define PREF_ORGANNAME_EYES 		"Глаза"
+#define PREF_ORGANNAME_EARS 		"Уши"
+#define PREF_ORGANNAME_HEART 		"Сердце"
+#define PREF_ORGANNAME_LUNGS 		"Лёгкие"
+#define PREF_ORGANNAME_LIVER 		"Печень"
+#define PREF_ORGANNAME_KIDNEYS 		"Почки"
+
+// Organ statuses (English)
+#define PREF_ORGANSTATUS_CYBORG_ENG 	"cyborg"
+#define PREF_ORGANSTATUS_AMPUTATED_ENG 	"amputated"
+#define PREF_ORGANSTATUS_CYBERNETIC_ENG "cybernetic"
+
+// Organ statuses (Russian)
+#define PREF_ORGANSTATUS_ORGANIC_RUS 	"Органика"
+#define PREF_ORGANSTATUS_AMPUTATED_RUS 	"Ампутировано"
+#define PREF_ORGANSTATUS_CYBERNETIC_RUS "Кибернетика"
+
+// Auto-hiss choices
+#define PREF_AUTOHISS_OFF 		"Нет"
+#define PREF_AUTOHISS_BASIC 	"Базовый"
+#define PREF_AUTOHISS_FULL 		"Полный"
+
+// Genders
+#define PREF_GENDER_MALE 		"Мужской"
+#define PREF_GENDER_FEMALE 		"Женский"
+#define PREF_GENDER_PLURAL 		"Бесполый"
+

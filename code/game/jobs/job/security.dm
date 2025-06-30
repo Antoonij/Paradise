@@ -126,8 +126,8 @@
 	supervisors = "the head of security"
 	department_head = list(JOB_TITLE_HOS)
 	selection_color = "#edcdcd"
-	access = list(ACCESS_SECURITY, ACCESS_SEC_DOORS, ACCESS_FORENSICS_LOCKERS, ACCESS_MORGUE, ACCESS_MAINT_TUNNELS, ACCESS_COURT, ACCESS_WEAPONS)
-	minimal_access = list(ACCESS_SEC_DOORS, ACCESS_FORENSICS_LOCKERS, ACCESS_MORGUE, ACCESS_MAINT_TUNNELS, ACCESS_COURT, ACCESS_WEAPONS)
+	access = list(ACCESS_SECURITY, ACCESS_SEC_DOORS, ACCESS_FORENSICS_LOCKERS, ACCESS_MORGUE, ACCESS_MAINT_TUNNELS, ACCESS_COURT, ACCESS_WEAPONS, ACCESS_BRIG)
+	minimal_access = list(ACCESS_SEC_DOORS, ACCESS_FORENSICS_LOCKERS, ACCESS_MORGUE, ACCESS_MAINT_TUNNELS, ACCESS_COURT, ACCESS_WEAPONS, ACCESS_BRIG)
 	alt_titles = list("Forensic Technician")
 	minimal_player_age = 14
 	exp_requirements = 1200
@@ -238,7 +238,6 @@
 	head = /obj/item/clothing/head/soft/sec
 	id = /obj/item/card/id/security/cadet
 	l_pocket = /obj/item/reagent_containers/spray/pepper
-	r_pocket = /obj/item/paper/deltainfo
 	suit_store = /obj/item/gun/energy/gun/advtaser
 	box = /obj/item/storage/box/survival_security/cadet
 

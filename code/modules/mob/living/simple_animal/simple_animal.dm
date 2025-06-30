@@ -3,7 +3,7 @@
 	icon = 'icons/mob/animal.dmi'
 	health = 20
 	maxHealth = 20
-	gender = PLURAL //placeholder
+	gender = MALE //placeholder
 
 	universal_understand = 1
 	universal_speak = 0
@@ -34,14 +34,12 @@
 	var/stop_automated_movement_when_pulled = 1 //When set to 1 this stops the animal from moving when someone is pulling it.
 
 	//Interaction
-	var/response_help   = "pokes"
-	var/response_disarm = "shoves"
-	var/response_harm   = "hits"
+	var/response_help   = "тычет"
+	var/response_disarm = "толкает"
+	var/response_harm   = "бъёт"
 	var/harm_intent_damage = 3
 	var/force_threshold = 0 //Minimum force required to deal any damage
 
-	/// Was this mob spawned by xenobiology magic? Used for mobcapping.
-	var/xenobiology_spawned = FALSE
 
 	/// If the mob can catch fire
 	var/can_be_on_fire = FALSE
@@ -69,6 +67,8 @@
 
 	var/speed = 1 //LETS SEE IF I CAN SET SPEEDS FOR SIMPLE MOBS WITHOUT DESTROYING EVERYTHING. Higher speed is slower, negative speed is faster
 	var/can_hide = FALSE
+	var/hidden = FALSE
+
 	/// Allows a mob to pass unbolted doors while hidden
 	var/pass_door_while_hidden = FALSE
 
@@ -179,6 +179,7 @@
 /mob/living/simple_animal/ComponentInitialize()
 	AddComponent(/datum/component/animal_temperature)
 
+
 ///Extra effects to add when the mob is tamed, such as adding a riding or whatever.
 /mob/living/simple_animal/proc/tamed(whomst)
 	return
@@ -191,10 +192,10 @@
 /mob/living/simple_animal/examine(mob/user)
 	. = ..()
 	if(stat == DEAD)
-		. += "<span class='deadsay'>Upon closer examination, [p_they()] appear[p_s()] to be dead.</span>"
+		. += span_deadsay("При ближайшем рассмотрении, [genderize_ru(user.gender,"он","она","оно","они")] выгляд[pluralize_ru(user.gender,"ит","ят")] мёртв[genderize_ru(user.gender,"ым","ой","ым","ыми")].")
 		return
 	if(IsSleeping())
-		. += "<span class='notice'>Upon closer examination, [p_they()] appear[p_s()] to be asleep.</span>"
+		. += span_notice("При ближайшем рассмотрении, [genderize_ru(user.gender,"он","она","оно","они")] выгляд[pluralize_ru(user.gender,"ит","ят")] спящ[genderize_ru(user.gender,"им","ей","им","ими")].")
 
 
 /mob/living/simple_animal/updatehealth(reason = "none given", should_log = FALSE)
@@ -243,6 +244,11 @@
 			set_stat(CONSCIOUS)
 	return ..()
 
+/mob/living/simple_animal/update_layer()
+	if(pulledby && loc == pulledby.loc)
+		layer = (pulledby.dir & NORTH) ? pulledby.layer - 0.001 : pulledby.layer + 0.001
+		return
+	layer = hidden? (/datum/action/innate/hide::layer_to_change_to) : (body_position == LYING_DOWN) ? LYING_MOB_LAYER : initial(layer)
 
 /mob/living/simple_animal/proc/handle_automated_action()
 	set waitfor = FALSE
@@ -391,7 +397,7 @@
 /mob/living/simple_animal/get_status_tab_items()
 	var/list/status_tab_data = ..()
 	. = status_tab_data
-	status_tab_data[++status_tab_data.len] = list("Health:", "[round((health / maxHealth) * 100)]%")
+	status_tab_data[++status_tab_data.len] = list("Здоровье:", "[round((health / maxHealth) * 100)]%")
 
 /mob/living/simple_animal/proc/drop_loot()
 	if(loot.len)
@@ -412,11 +418,9 @@
 		if(death_sound)
 			playsound(get_turf(src),death_sound, 200, 1)
 		if(deathmessage)
-			visible_message(span_danger("\The [src] [genderize_decode(src, deathmessage)]"))
+			visible_message(span_danger("[capitalize(src.declent_ru(NOMINATIVE))] [genderize_decode(src, deathmessage)]"))
 		else if(!del_on_death)
-			visible_message(span_danger("\The [src] stops moving..."))
-	if(xenobiology_spawned)
-		SSmobs.xenobiology_mobs--
+			visible_message(span_danger("[capitalize(src.declent_ru(NOMINATIVE))] перестаёт двигаться..."))
 	if(del_on_death)
 		//Prevent infinite loops if the mob Destroy() is overridden in such
 		//a manner as to cause a call to death() again
@@ -639,6 +643,8 @@
 	AIStatus = togglestatus
 	AI_delay_current = world.time
 
+/mob/living/simple_animal/proc/lose_target()
+	return
 
 /mob/living/simple_animal/proc/consider_wakeup()
 	if(pulledby || shouldwakeup)
@@ -660,7 +666,10 @@
 	pcollar = P
 	regenerate_icons()
 	if(user)
-		to_chat(user, span_notice("You put [P] around [src]'s neck."))
+		visible_message(
+			span_warning(span_notice("Вы надеваете [P.declent_ru(ACCUSATIVE)] на шею [src.declent_ru(GENITIVE)].")),
+			span_warning(span_notice("[user.declent_ru(NOMINATIVE)] надева[pluralize_ru(user.gender,"ет","ют")] [P.declent_ru(ACCUSATIVE)] вам на шею [src.declent_ru(GENITIVE)]."))
+		)
 	if(P.tagname && !unique_pet)
 		name = P.tagname
 		real_name = P.tagname
@@ -712,11 +721,11 @@
 /mob/living/simple_animal/proceed_attack_results(obj/item/I, mob/living/user, params, def_zone)
 	if(I.force && (I.force < force_threshold || I.damtype == STAMINA))
 		visible_message(
-			span_warning("[user] tries to hit [src] with [I], but it bounces harmlessly!"),
-			span_warning("[user] tries to hit you with [I], but it bounces harmlessly!"),
+			span_warning("[user.declent_ru(NOMINATIVE)] пытается ударить [src.declent_ru(ACCUSATIVE)] [I.declent_ru(INSTRUMENTAL)], но удар безвредно отскакивает!"),
+			span_warning("[user.declent_ru(NOMINATIVE)] пытается ударить вас [I.declent_ru(INSTRUMENTAL)], но удар безвредно отскакивает!"),
 			ignored_mobs = user,
 		)
-		to_chat(user, span_danger("This weapon is ineffective, it does no damage!"))
+		to_chat(user, span_danger("Это оружие неэффективно - оно не наносит урона!"))
 		return ATTACK_CHAIN_BLOCKED
 
 	. = ..()

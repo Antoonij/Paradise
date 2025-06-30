@@ -124,6 +124,9 @@
 	///Mech subtype. Currently used in paintkits.
 	var/mech_type = MECH_TYPE_NONE
 
+	/// Modifier of some phasing effects.
+	var/phase_modifier = 1
+
 	hud_possible = list (DIAG_STAT_HUD, DIAG_BATT_HUD, DIAG_MECH_HUD, DIAG_TRACK_HUD)
 
 /obj/mecha/Initialize()
@@ -135,7 +138,7 @@
 	add_airtank()
 	spark_system.set_up(2, 0, src)
 	spark_system.attach(src)
-	smoke_system.set_up(3, src)
+	smoke_system.set_up(amount = 3, location = src)
 	smoke_system.attach(src)
 	add_cell()
 	START_PROCESSING(SSobj, src)
@@ -519,16 +522,16 @@
 			can_move = world.time + step_in_final
 			if(turnsound)
 				playsound(src, turnsound, 40, 1)
-		if(phasing && get_charge() >= phasing_energy_drain)
+		if(phasing && get_charge() >= phasing_energy_drain / phase_modifier)
 			if(strafe) //No strafe while phase mode is active
 				toggle_strafe(silent = TRUE)
 			if(can_move < world.time)
 				. = FALSE // We lie to mech code and say we didn't get to move, because we want to handle power usage + cooldown ourself
 				flick("[initial_icon]-phase", src)
 				forceMove(get_step(src, direction))
-				use_power(phasing_energy_drain)
+				use_power(phasing_energy_drain / phase_modifier)
 				playsound(src, stepsound, 40, 1)
-				can_move = world.time + (step_in * 3)
+				can_move = world.time + (step_in * 3 / phase_modifier)
 	else if(stepsound)
 		playsound(src, stepsound, 40, 1)
 
@@ -680,13 +683,14 @@
 		return FALSE
 	var/booster_deflection_modifier = 1
 	var/booster_damage_modifier = 1
-	if(damage_flag == "bullet" || damage_flag == "laser" || damage_flag == "energy")
+	var/projectile_check = damage_flag == BULLET || damage_flag == LASER || damage_flag == ENERGY
+	if(projectile_check)
 		for(var/obj/item/mecha_parts/mecha_equipment/antiproj_armor_booster/B in equipment)
 			if(B.projectile_react())
 				booster_deflection_modifier = B.deflect_coeff
 				booster_damage_modifier = B.damage_coeff
 				break
-	else if(damage_flag == "melee")
+	else if(damage_flag == MELEE)
 		for(var/obj/item/mecha_parts/mecha_equipment/anticcw_armor_booster/B in equipment)
 			if(B.attack_react())
 				booster_deflection_modifier *= B.deflect_coeff
@@ -698,7 +702,7 @@
 		booster_damage_modifier /= facing_modifier
 		booster_deflection_modifier *= facing_modifier
 	if(prob(deflect_chance * booster_deflection_modifier))
-		visible_message(span_danger("[src]'s armour deflects the attack!"))
+		visible_message(span_danger("[src]'s armour deflects the attack!"), projectile_message = projectile_check)
 		log_message("Armor saved.")
 		return FALSE
 	if(.)
@@ -752,7 +756,7 @@
 		add_attack_logs(locateUID(I.thrownby), OCCUPANT_LOGGING, "threw [AM] at mech [src]")
 	. = ..()
 
-/obj/mecha/bullet_act(obj/item/projectile/Proj) //wrapper
+/obj/mecha/bullet_act(obj/projectile/Proj) //wrapper
 	log_message("Hit by projectile. Type: [Proj.name]([Proj.flag]).")
 	add_attack_logs(Proj.firer, OCCUPANT_LOGGING, "shot [Proj.name]([Proj.flag]) at mech [src]")
 	..()
@@ -896,7 +900,7 @@
 		to_chat(user, span_notice("You replace the fused wires."))
 		return ATTACK_CHAIN_PROCEED
 
-	if(istype(I, /obj/item/stock_parts/cell) && state == 4)
+	if(iscell(I) && state == 4)
 		add_fingerprint(user)
 		if(cell)
 			to_chat(user, span_warning("There's already a powercell installed."))
@@ -1492,7 +1496,7 @@
 
 	if(mob_container.forceMove(newloc))//ejecting mob container
 		log_message("[mob_container] moved out.")
-		L << browse(null, "window=exosuit")
+		close_window(L, "exosuit")
 
 		if(istype(mob_container, /obj/item/mmi))
 			var/obj/item/mmi/mmi = mob_container

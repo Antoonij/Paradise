@@ -15,6 +15,7 @@
 #define MAGIC_TRAIT "magic"
 #define CULT_TRAIT "cult"
 #define CLOCK_TRAIT "clockwork_cult"
+#define DEVIL_TRAIT "devil"
 #define INNATE_TRAIT "innate"
 #define EAR_DAMAGE "ear_damage"
 #define EYE_DAMAGE "eye_damage"
@@ -75,6 +76,8 @@
 /// Traits applied to a silicon mob by their model.
 #define ROBOT_TRAIT "robot_trait"
 
+#define FACEHUGER_TRAIT "facehugger_trait"
+
 /// A trait gained from a mob's leap action, like the leaper
 #define LEAPING_TRAIT "leaping"
 
@@ -98,6 +101,8 @@
 #define SUIT_TRAIT "suit_trait"
 /// Trait associated to lying down (having a [lying_angle] of a different value than zero).
 #define LYING_DOWN_TRAIT "lying-down"
+
+#define THROWED_TRAIT "throwed_trait"
 
 #define NO_GRAVITY_TRAIT "no-gravity"
 #define NEGATIVE_GRAVITY_TRAIT "negative-gravity"
@@ -166,3 +171,11 @@
 #define BLOB_ZOMBIE_TRAIT "blob_zombie_trait"
 
 #define ADMIN_OFFER_TRAIT "admin_offer"
+
+#define GRAVITATION_TRAIT	"gravitation"
+
+#define FAKEFIRE_TRAIT "fakefire"
+
+#define DEVIL_CONTRACT_TRAIT "devil_contract"
+
+#define DEVIL_RITUAL_TRAIT "devil_ritual"

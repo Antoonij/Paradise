@@ -137,7 +137,7 @@
 			if(world.timeofday > (R.last_addiction_dose + ADDICTION_SPEEDUP_TIME)) // 2.5 minutes
 				addiction_removal_chance = 10
 			if(prob(addiction_removal_chance))
-				to_chat(occupant, span_notice("Ваш разум проясняется, а навязчивые мысли уходят. Похоже, вы побороли свою зависимость от [R.name]!"))
+				to_chat(occupant, span_notice("Ваш разум проясняется, а навязчивые мысли уходят. Похоже, вы побороли свою зависимость от <b>[R.name]</b>!"))
 				occupant.reagents.addiction_list.Remove(R)
 				qdel(R)
 
@@ -475,7 +475,7 @@
 
 /obj/machinery/sleeper/verb/eject()
 	set name = "Извлечь пациента"
-	set category = "Object"
+	set category = STATPANEL_OBJECT
 	set src in oview(1)
 
 	if(usr.default_can_use_topic(src) != UI_INTERACTIVE)
@@ -489,7 +489,7 @@
 
 /obj/machinery/sleeper/verb/remove_beaker()
 	set name = "Достать ёмкость"
-	set category = "Object"
+	set category = STATPANEL_OBJECT
 	set src in oview(1)
 
 	if(usr.incapacitated() || HAS_TRAIT(usr, TRAIT_HANDS_BLOCKED) || !Adjacent(usr))
@@ -567,7 +567,7 @@
 
 /obj/machinery/sleeper/verb/move_inside()
 	set name = "Залезть внутрь"
-	set category = "Object"
+	set category = STATPANEL_OBJECT
 	set src in oview(1)
 	if(!ishuman(usr) || usr.incapacitated() || HAS_TRAIT(usr, TRAIT_HANDS_BLOCKED) || usr.buckled)
 		return

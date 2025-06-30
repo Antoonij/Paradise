@@ -269,12 +269,12 @@
 
 /obj/vv_get_dropdown()
 	. = ..()
-	.["Delete all of type"] = "?_src_=vars;delall=[UID()]"
+	.["Delete all of type"] = "byond://?_src_=vars;delall=[UID()]"
 	if(!speed_process)
-		.["Make speed process"] = "?_src_=vars;makespeedy=[UID()]"
+		.["Make speed process"] = "byond://?_src_=vars;makespeedy=[UID()]"
 	else
-		.["Make normal process"] = "?_src_=vars;makenormalspeed=[UID()]"
-	.["Modify armor values"] = "?_src_=vars;modifyarmor=[UID()]"
+		.["Make normal process"] = "byond://?_src_=vars;makenormalspeed=[UID()]"
+	.["Modify armor values"] = "byond://?_src_=vars;modifyarmor=[UID()]"
 
 /obj/proc/check_uplink_validity()
 	return TRUE
@@ -327,8 +327,10 @@
 	playsound(src, 'sound/weapons/punch1.ogg', 35, TRUE)
 	if(mob_hurt) //Density check probably not needed, one should only bump into something if it is dense, and blob tiles are not dense, because of course they are not.
 		return
-	C.visible_message(span_danger("[C] slams into [src]!"),
-					span_userdanger("You slam into [src]!"))
+	C.visible_message(
+		span_danger("[capitalize(C.declent_ru(NOMINATIVE))] с размаху вреза[pluralize_ru(C.gender,"ет","ют")]ся в [declent_ru(ACCUSATIVE)]!"),
+		span_userdanger("Вы с размаху врезаетесь в [declent_ru(ACCUSATIVE)]!")
+	)
 	C.take_organ_damage(damage)
 	if(!self_hurt)
 		take_damage(damage, BRUTE)

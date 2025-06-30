@@ -164,6 +164,17 @@ MEDICAL
 	vision_flags = SEE_TURFS
 	lighting_alpha = LIGHTING_PLANE_ALPHA_MOSTLY_VISIBLE
 
+/obj/item/clothing/glasses/hud/health/monocle
+	name = "Medical HUD Monocle"
+	desc = "Моноколь со встроенным медицинским ИЛС."
+	icon_state = "monohudmed"
+	item_state = "monohud"
+	sprite_sheets = list(
+		SPECIES_VOX = 'icons/mob/clothing/species/vox/eyes.dmi',
+		SPECIES_DRASK = 'icons/mob/clothing/species/drask/eyes.dmi',
+		SPECIES_MONKEY = 'icons/mob/clothing/species/monkey/eyes.dmi'
+	)
+
 /*
 DIAGNOSTIC
 */
@@ -247,6 +258,18 @@ DIAGNOSTIC
 	)
 	icon_state = "diagvisor"
 	item_state = "diagvisor"
+
+/obj/item/clothing/glasses/hud/diagnostic/monocle
+	name = "Diagnostic HUD Monocle"
+	desc = "Моноколь со встроенным диагностическим ИЛС."
+	icon_state = "monohuddiag"
+	item_state = "monohud"
+	sprite_sheets = list(
+		SPECIES_VOX = 'icons/mob/clothing/species/vox/eyes.dmi',
+		SPECIES_DRASK = 'icons/mob/clothing/species/drask/eyes.dmi',
+		SPECIES_MONKEY = 'icons/mob/clothing/species/monkey/eyes.dmi'
+	)
+
 /*
 SECURITY
 */
@@ -404,6 +427,17 @@ SECURITY
 	icon_state = "securityvisor"
 	item_state = "securityvisor"
 
+/obj/item/clothing/glasses/hud/security/monocle
+	name = "Security HUD Monocle"
+	desc = "Моноколь со встроенным охранным ИЛС."
+	icon_state = "monohudsec"
+	item_state = "monohud"
+	sprite_sheets = list(
+		SPECIES_VOX = 'icons/mob/clothing/species/vox/eyes.dmi',
+		SPECIES_DRASK = 'icons/mob/clothing/species/drask/eyes.dmi',
+		SPECIES_MONKEY = 'icons/mob/clothing/species/monkey/eyes.dmi'
+	)
+
 /*
 HYDROPONIC
 */
@@ -485,6 +519,18 @@ HYDROPONIC
 	)
 	icon_state = "hydroponicvisor"
 	item_state = "hydroponicvisor"
+
+/obj/item/clothing/glasses/hud/hydroponic/monocle
+	name = "Hydroponic HUD Monocle"
+	desc = "Моноколь со встроенным ботаническим ИЛС."
+	icon_state = "monohudhydro"
+	item_state = "monohud"
+	sprite_sheets = list(
+		SPECIES_VOX = 'icons/mob/clothing/species/vox/eyes.dmi',
+		SPECIES_DRASK = 'icons/mob/clothing/species/drask/eyes.dmi',
+		SPECIES_MONKEY = 'icons/mob/clothing/species/monkey/eyes.dmi'
+	)
+
 /*
 SKILLS
 */
@@ -575,6 +621,30 @@ SKILLS
 	tint = 1
 	HUDType = DATA_HUD_MEDICAL_ADVANCED
 
+/obj/item/clothing/glasses/hud/blueshield/cap
+	name = "\improper Gold multi-mod HUD glasses"
+	desc = "Солнечные очки с многорежимным ИЛС, выполненные в золотом цвете."
+	ru_names = list(
+		NOMINATIVE = "золотые много-режимные ИЛС-очки",
+		GENITIVE = "золотых много-режимных ИЛС-очков",
+		DATIVE = "золотым много-режимным ИЛС-очкам",
+		ACCUSATIVE = "золотые много-режимные ИЛС-очки",
+		INSTRUMENTAL = "золотыми много-режимными ИЛС-очками",
+		PREPOSITIONAL = "золотых много-режимных ИЛС-очках"
+	)
+	icon_state = "sunhudcap"
+	item_state = "sunhudcap"
+	sprite_sheets = list(
+		SPECIES_DRASK = 'icons/mob/clothing/species/drask/eyes.dmi',
+		SPECIES_GREY  = 'icons/mob/clothing/species/grey/eyes.dmi',
+		SPECIES_VOX = 'icons/mob/clothing/species/vox/eyes.dmi',
+		SPECIES_MONKEY = 'icons/mob/clothing/species/monkey/eyes.dmi',
+		SPECIES_FARWA = 'icons/mob/clothing/species/monkey/eyes.dmi',
+		SPECIES_WOLPIN = 'icons/mob/clothing/species/monkey/eyes.dmi',
+		SPECIES_NEARA = 'icons/mob/clothing/species/monkey/eyes.dmi',
+		SPECIES_STOK = 'icons/mob/clothing/species/monkey/eyes.dmi'
+	)
+
 /obj/item/clothing/glasses/hud/blueshield/attack_self(mob/user)
 	if(HUDType)
 		var/datum/atom_hud/H = GLOB.huds[HUDType]
@@ -589,6 +659,8 @@ SKILLS
 		else
 			HUDType = DATA_HUD_SECURITY_ADVANCED
 			examine_extensions = EXAMINE_HUD_SECURITY_READ | EXAMINE_HUD_SECURITY_WRITE
+	var/datum/atom_hud/newH = GLOB.huds[HUDType]
+	newH.add_hud_to(user)
 	balloon_alert(user, "режим переключён")
 	return
 
@@ -605,3 +677,14 @@ SKILLS
 	)
 	icon_state = "skillvisor"
 	item_state = "skillvisor"
+
+/obj/item/clothing/glasses/hud/skills/monocle
+	name = "Skills HUD Monocle"
+	desc = "Моноколь со встроенным ИЛС навыков."
+	icon_state = "monohudskill"
+	item_state = "monohud"
+	sprite_sheets = list(
+		SPECIES_VOX = 'icons/mob/clothing/species/vox/eyes.dmi',
+		SPECIES_DRASK = 'icons/mob/clothing/species/drask/eyes.dmi',
+		SPECIES_MONKEY = 'icons/mob/clothing/species/monkey/eyes.dmi'
+	)

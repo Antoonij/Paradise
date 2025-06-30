@@ -49,12 +49,13 @@
 #define JOB_FLAG_QUARTERMASTER		(1<<6)
 #define JOB_FLAG_CARGOTECH			(1<<7)
 #define JOB_FLAG_MINER				(1<<8)
-#define JOB_FLAG_LAWYER			(1<<9)
+#define JOB_FLAG_LAWYER				(1<<9)
 #define JOB_FLAG_CHAPLAIN			(1<<10)
 #define JOB_FLAG_CLOWN				(1<<11)
 #define JOB_FLAG_MIME				(1<<12)
 #define JOB_FLAG_CIVILIAN			(1<<13)
 #define JOB_FLAG_EXPLORER			(1<<14)
+#define JOB_FLAG_MINING_MEDIC			(1<<15)
 
 #define JOBCAT_KARMA				(1<<3)
 
@@ -111,6 +112,7 @@
 #define JOB_TITLE_QUARTERMASTER "Quartermaster"
 #define JOB_TITLE_CARGOTECH "Cargo Technician"
 #define JOB_TITLE_MINER "Shaft Miner"
+#define JOB_TITLE_MINING_MEDIC "Mining Medic"
 
 #define JOB_TITLE_BARTENDER "Bartender"
 #define JOB_TITLE_CHEF "Chef"
@@ -127,6 +129,14 @@
 #define JOB_TITLE_CCSPECOPS "Special Operations Officer"
 #define JOB_TITLE_CCSUPREME "Supreme Commander"
 #define JOB_TITLE_CCSOLGOV "Solar Federation General"
+
+///Other
+#define SYNDICATE_OPERATIVE "Syndicate Operative"
+#define SYNDICATE_OPERATIVE_LEADER "Syndicate Operative Leader"
+#define SYNDICATE_AGENT "Syndicate Agent"
+#define SYNDICATE_COMMANDO "Syndicate Commando"
+#define VOX_RAIDER "Vox Raider"
+#define VOX_TRADER "Vox Trader"
 
 ///Taipan (ghost role) related stuff
 

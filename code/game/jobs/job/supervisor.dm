@@ -1,4 +1,4 @@
-GLOBAL_DATUM_INIT(captain_announcement, /datum/announcement/minor, new(do_newscast = 0)) // Why the hell are captain announcements minor
+GLOBAL_DATUM_INIT(captain_announcement, /datum/announcement/minor, new(do_newscast = FALSE)) // Why the hell are captain announcements minor
 /datum/job/captain
 	title = JOB_TITLE_CAPTAIN
 	flag = JOB_FLAG_CAPTAIN
@@ -40,7 +40,7 @@ GLOBAL_DATUM_INIT(captain_announcement, /datum/announcement/minor, new(do_newsca
 	shoes = /obj/item/clothing/shoes/brown
 	head = /obj/item/clothing/head/caphat
 	l_ear = /obj/item/radio/headset/heads/captain/alt
-	glasses = /obj/item/clothing/glasses/hud/skills/sunglasses
+	glasses = /obj/item/clothing/glasses/hud/blueshield/cap
 	id = /obj/item/card/id/gold
 	l_pocket = /obj/item/lighter/zippo/cap
 	pda = /obj/item/pda/captain

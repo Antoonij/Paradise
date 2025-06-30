@@ -255,6 +255,9 @@
 	if(.)
 		return .
 
+	if(HAS_TRAIT(src, TRAIT_SPACEWALK))
+		return TRUE
+
 	if(buckled)
 		return TRUE
 
@@ -320,7 +323,7 @@
 		return rebound
 
 
-/mob/has_gravity(turf/gravity_turf)
+/mob/get_gravity(turf/gravity_turf)
 	if(!isnull(GLOB.gravity_is_on))	// global admin override.
 		return GLOB.gravity_is_on
 	return mob_negates_gravity() || ..()
@@ -475,8 +478,8 @@
 	return
 
 /mob/verb/move_up()
-	set name = "Move Upwards"
-	set category = "IC"
+	set name = "Подняться"
+	set category = STATPANEL_IC
 
 	if(remote_control)
 		return remote_control.relaymove(src, UP)
@@ -503,8 +506,8 @@
 		to_chat(src, span_notice("You move upwards."))
 
 /mob/verb/move_down()
-	set name = "Move Down"
-	set category = "IC"
+	set name = "Опуститься"
+	set category = STATPANEL_IC
 
 	if(remote_control)
 		return remote_control.relaymove(src, DOWN)

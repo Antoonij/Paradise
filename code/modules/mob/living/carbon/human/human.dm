@@ -211,8 +211,8 @@
 	var/list/status_tab_data = ..()
 	. = status_tab_data
 
-	status_tab_data[++status_tab_data.len] = list("Intent:", "[a_intent]")
-	status_tab_data[++status_tab_data.len] = list("Move Mode:", "[m_intent]")
+	status_tab_data[++status_tab_data.len] = list("Намерение:", "[a_intent]")
+	status_tab_data[++status_tab_data.len] = list("Режим передвижения:", "[m_intent]")
 
 	var/total_user_contents = GetAllContents() // cache it
 	if(locate(/obj/item/gps) in total_user_contents)
@@ -478,7 +478,7 @@
 			forcesay()
 		if(undergoing_cardiac_arrest() && (shock_damage * siemens_coeff >= 1) && prob(25))
 			if(set_heartattack(FALSE) && stat == CONSCIOUS)
-				to_chat(src, span_notice("You feel your heart beating again!"))
+				to_chat(src, span_notice("Вы чувствуете, как ваше сердце вновь бьется!"))
 
 	dna.species.spec_electrocute_act(src, shock_damage, source, siemens_coeff, flags, jitter_time, stutter_time, stun_duration)
 
@@ -495,8 +495,8 @@
 				return
 			var/time_taken = thing.embedded_unsafe_removal_time * thing.w_class
 			usr.visible_message(
-				span_warning("[usr] attempts to remove [thing] from [usr.p_their()] [bodypart.name]."),
-				span_notice("You attempt to remove [thing] from your [bodypart.name]... (It will take [time_taken/10] seconds.)"),
+				span_warning("[usr] пыта[pluralize_ru(usr.gender,"ет","ют")]ся извлечь [thing.declent_ru(ACCUSATIVE)] из [GLOB.body_zone[bodypart][GENITIVE]]."),
+				span_notice("Вы пытаетесь извлечь [thing.declent_ru(ACCUSATIVE)] из [GLOB.body_zone[bodypart][GENITIVE]]... (Это займет [time_taken/10] секунд.)"),
 			)
 			if(do_after(usr, time_taken, src))
 				if(QDELETED(thing) || QDELETED(bodypart) || thing.loc != bodypart || !LAZYIN(bodypart.embedded_objects, thing))
@@ -509,8 +509,8 @@
 					if(h_user.has_pain())
 						h_user.emote("scream")
 				usr.visible_message(
-					span_warning("[usr] successfully rips [thing] out of [usr.p_their()] [bodypart.name]!"),
-					span_notice("You successfully remove [thing] from your [bodypart.name]."),
+					span_warning("[usr] с усилием извлека[pluralize_ru(usr.gender,"ет","ют")] [thing.declent_ru(ACCUSATIVE)] из [GLOB.body_zone[bodypart][GENITIVE]]!"),
+					span_notice("Вы успешно извлекли [thing.declent_ru(ACCUSATIVE)] из [GLOB.body_zone[bodypart][GENITIVE]]."),
 				)
 			return
 
@@ -546,7 +546,7 @@
 											rank = U.get_assignment()
 										else if(isrobot(usr))
 											var/mob/living/silicon/robot/U = usr
-											rank = "[U.modtype] [U.braintype]"
+											rank = "[U.modtype?.name] [U.braintype]"
 										else if(isAI(usr))
 											rank = JOB_TITLE_AI
 										set_criminal_status(usr, R, setcriminal, t1, rank)
@@ -1265,8 +1265,8 @@
 	return dna.species.default_language ? GLOB.all_languages[dna.species.default_language] : null
 
 /mob/living/carbon/human/proc/bloody_doodle()
-	set category = "IC"
-	set name = "Write in blood"
+	set category = STATPANEL_IC
+	set name = "Рисовать кровью"
 	set desc = "Use blood on your hands to write a short message on the floor or a wall, murder mystery style."
 
 	if(usr != src)
@@ -1556,26 +1556,26 @@ Eyes need to have significantly high darksight to shine unless the mob has the X
 
 /mob/living/carbon/human/selfFeed(obj/item/reagent_containers/food/toEat, fullness)
 	if(!istype(toEat, /obj/item/reagent_containers/food/pill/patch) && !check_has_mouth())
-		to_chat(src, "Where do you intend to put [toEat]? You don't have a mouth!")
+		balloon_alert(src, "у вас нет рта!") //but I must scream
 		return FALSE
 	return ..()
 
 /mob/living/carbon/human/forceFed(obj/item/reagent_containers/food/toEat, mob/user, fullness)
 	if(!istype(toEat, /obj/item/reagent_containers/food/pill/patch) && !check_has_mouth())
 		if(!((istype(toEat, /obj/item/reagent_containers/food/drinks) && (ismachineperson(src)))))
-			to_chat(user, "Where do you intend to put [toEat]? [src] doesn't have a mouth!")
+			balloon_alert(user, "у цели нет рта!")
 			return FALSE
 	return ..()
 
 /mob/living/carbon/human/selfDrink(obj/item/reagent_containers/food/drinks/toDrink)
 	if(!check_has_mouth())
 		if(!ismachineperson(src))
-			to_chat(src, "Where do you intend to put \the [src]? You don't have a mouth!")
+			balloon_alert(src, "у вас нет рта!")
 			return FALSE
 		else
-			to_chat(src, "<span class='notice'>You pour a bit of liquid from [toDrink] into your connection port.</span>")
+			to_chat(src, span_notice("Вы заливете часть содержимого [toDrink.declent_ru(GENITIVE)] в свой отсек для жидкостей."))
 	else
-		to_chat(src, "<span class='notice'>You swallow a gulp of [toDrink].</span>")
+		to_chat(src, span_notice("Вы делаете глоток из [toDrink.declent_ru(GENITIVE)]."))
 	return TRUE
 
 /mob/living/carbon/human/can_track(mob/living/user)
@@ -1613,7 +1613,7 @@ Eyes need to have significantly high darksight to shine unless the mob has the X
 	. = ..()
 
 	if(check_gun.trigger_guard == TRIGGER_GUARD_NORMAL && HAS_TRAIT(src, TRAIT_NO_GUNS))
-		balloon_alert(src, span_warning("слишком толстые пальцы"))
+		balloon_alert(src, span_warning("слишком толстые пальцы!"))
 		return FALSE
 
 	if(mind && mind.martial_art && mind.martial_art.no_guns) //great dishonor to famiry
@@ -1734,14 +1734,14 @@ Eyes need to have significantly high darksight to shine unless the mob has the X
 /mob/living/carbon/human/vv_get_dropdown()
 	. = ..()
 	. += "---"
-	.["Set Species"] = "?_src_=vars;setspecies=[UID()]"
-	.["Copy Outfit"] = "?_src_=vars;copyoutfit=[UID()]"
-	.["Make AI"] = "?_src_=vars;makeai=[UID()]"
-	.["Make cyborg"] = "?_src_=vars;makerobot=[UID()]"
-	.["Make monkey"] = "?_src_=vars;makemonkey=[UID()]"
-	.["Make alien"] = "?_src_=vars;makealien=[UID()]"
-	.["Make slime"] = "?_src_=vars;makeslime=[UID()]"
-	.["Make superhero"] = "?_src_=vars;makesuper=[UID()]"
+	.["Set Species"] = "byond://?_src_=vars;setspecies=[UID()]"
+	.["Copy Outfit"] = "byond://?_src_=vars;copyoutfit=[UID()]"
+	.["Make AI"] = "byond://?_src_=vars;makeai=[UID()]"
+	.["Make cyborg"] = "byond://?_src_=vars;makerobot=[UID()]"
+	.["Make monkey"] = "byond://?_src_=vars;makemonkey=[UID()]"
+	.["Make alien"] = "byond://?_src_=vars;makealien=[UID()]"
+	.["Make slime"] = "byond://?_src_=vars;makeslime=[UID()]"
+	.["Make superhero"] = "byond://?_src_=vars;makesuper=[UID()]"
 	. += "---"
 
 
@@ -1780,14 +1780,12 @@ Eyes need to have significantly high darksight to shine unless the mob has the X
 
 
 /mob/living/carbon/human/fakefire()
-	if(!overlays_standing[FIRE_LAYER])
-		overlays_standing[FIRE_LAYER] = image(FIRE_DMI(src), icon_state = "Generic_mob_burning")
-		update_icons()
+	ADD_TRAIT(src, TRAIT_FAKE_FIRE, FAKEFIRE_TRAIT)
+	update_fire()
 
 /mob/living/carbon/human/fakefireextinguish()
-	overlays_standing[FIRE_LAYER] = null
-	update_icons()
-
+	REMOVE_TRAIT(src, TRAIT_FAKE_FIRE, FAKEFIRE_TRAIT)
+	update_fire()
 
 /mob/living/carbon/human/proc/cleanSE()	//remove all disabilities/powers
 	for(var/block = 1; block <= DNA_SE_LENGTH; block++)
@@ -1828,16 +1826,16 @@ Eyes need to have significantly high darksight to shine unless the mob has the X
 
 
 /mob/living/carbon/human/verb/pose()
-	set name = "Set Pose"
+	set name = "Задать позу"
 	set desc = "Устанавливает короткое описание отображаемое при омотре вас."
-	set category = "IC"
+	set category = STATPANEL_IC
 
 	pose = tgui_input_text(usr, "Это [src]. [p_they(TRUE)] [p_are()]...", "Pose", pose)
 
 /mob/living/carbon/human/verb/set_flavor()
-	set name = "Set Flavour Text"
+	set name = "Описание внешности"
 	set desc = "Устанавливает подробное описание внешности вашего персонажа."
-	set category = "IC"
+	set category = STATPANEL_IC
 
 	update_flavor_text()
 
@@ -1941,3 +1939,6 @@ Eyes need to have significantly high darksight to shine unless the mob has the X
 		return
 
 	return buckle_mob(target, TRUE, FALSE, CARRIER_NEEDS_ARM) //checkloc is false because we usually grab people from nearest tile
+
+/mob/living/carbon/human/monkeybrain
+	ai_controller = /datum/ai_controller/monkey

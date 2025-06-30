@@ -26,6 +26,7 @@
 	armor = list("melee" = 0, "bullet" = 0, "laser" = 0, "energy" = 100, "bomb" = 0, "bio" = 100, "rad" = 100, "fire" = 30, "acid" = 30)
 	on = FALSE
 	vent_movement = VENTCRAWL_CAN_SEE
+	interaction_flags_click = NEED_HANDS | ALLOW_RESTING
 	var/temperature_archived
 	var/mob/living/carbon/occupant
 	/// A separate effect for the occupant, as you can't animate overlays reliably and constantly removing and adding overlays is spamming the subsystem.
@@ -152,7 +153,7 @@
 	if(!istype(user.loc, /turf) || !istype(O.loc, /turf)) // are you in a container/closet/pod/etc?
 		return
 	if(occupant)
-		balloon_alert(user, "внтури кто-то есть!")
+		balloon_alert(user, "внутри кто-то есть!")
 		return TRUE
 	var/mob/living/L = O
 	if(!istype(L) || L.buckled)
@@ -506,16 +507,15 @@
 	return TRUE
 
 
-/obj/machinery/atmospherics/unary/cryo_cell/AltClick(mob/living/carbon/user)
-	if(!iscarbon(user) || user.incapacitated() || HAS_TRAIT(user, TRAIT_HANDS_BLOCKED) || !Adjacent(user))
-		return
+/obj/machinery/atmospherics/unary/cryo_cell/click_alt(mob/living/carbon/user)
 	go_out()
 	add_fingerprint(user)
+	return CLICK_ACTION_SUCCESS
 
 
 /obj/machinery/atmospherics/unary/cryo_cell/verb/move_eject()
 	set name = "Извлечь пациента"
-	set category = "Object"
+	set category = STATPANEL_OBJECT
 	set src in oview(1)
 
 	if(usr == occupant)//If the user is inside the tube...
@@ -549,7 +549,7 @@
 
 /obj/machinery/atmospherics/unary/cryo_cell/verb/move_inside()
 	set name = "Залезть внутрь"
-	set category = "Object"
+	set category = STATPANEL_OBJECT
 	set src in oview(1)
 
 	if(usr.has_buckled_mobs()) //mob attached to us
