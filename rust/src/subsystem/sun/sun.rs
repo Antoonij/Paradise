@@ -1,15 +1,15 @@
-use atomic_float::AtomicF32;
 use byondapi::{byond_string, value::ByondValue};
-use parking_lot::RwLock;
 use rand::Rng;
-use std::sync::atomic::Ordering;
+use std::cell::Cell;
+use std::cell::RefCell;
+use std::collections::HashMap;
 
 pub struct Sun {
-    pub rate: AtomicF32,
-    pub dx: AtomicF32,
-    pub dy: AtomicF32,
-    pub angle: AtomicF32,
-    pub solars: RwLock<Vec<ByondValue>>,
+    pub rate: Cell<f32>,
+    pub dx: Cell<f32>,
+    pub dy: Cell<f32>,
+    pub angle: Cell<f32>,
+    pub solars: RefCell<HashMap<u32, ByondValue>>,
 }
 
 impl Sun {
@@ -22,11 +22,11 @@ impl Sun {
             rate = -rate;
         };
 
-        self.rate.store(rate, Ordering::Relaxed);
-        self.angle.store(angle, Ordering::Relaxed);
+        self.rate.replace(rate);
+        self.angle.replace(angle);
 
         self.setup_solars()?;
-        Ok(ByondValue::from(true))
+        Ok(ByondValue::null())
     }
 
     pub fn update_position(&self) -> eyre::Result<ByondValue> {
@@ -36,67 +36,49 @@ impl Sun {
         let max_abs = sin.abs().max(cos.abs());
         let (dx, dy) = (sin / max_abs, cos / max_abs);
 
-        self.dx.store(dx, Ordering::Relaxed);
-        self.dy.store(dy, Ordering::Relaxed);
+        self.dx.replace(dx);
+        self.dy.replace(dy);
 
         self.update_solars()?;
-        Ok(ByondValue::from(true))
+        Ok(ByondValue::null())
     }
 
     fn update_angle(&self) -> f32 {
-        let updated_angle =
-            (360.0 + self.angle.load(Ordering::Relaxed) + self.rate.load(Ordering::Relaxed) * 6.0)
-                % 360.0;
+        let updated_angle = (360.0 + self.angle.get() + self.rate.get() * 6.0) % 360.0;
 
-        self.angle.store(updated_angle, Ordering::Relaxed);
+        self.angle.replace(updated_angle);
         updated_angle
     }
 
     pub fn setup_solars(&self) -> eyre::Result<ByondValue> {
-        let solars = self.solars.read();
         let proc_setup = byond_string!("setup");
 
-        solars.iter().for_each(|solar| {
+        self.solars.borrow().values().for_each(|solar| {
             let _ = solar.call_id(proc_setup, &[]);
         });
 
-        Ok(ByondValue::from(true))
+        Ok(ByondValue::null())
     }
 
     pub fn update_solars(&self) -> eyre::Result<ByondValue> {
-        let solars = self.solars.read();
         let proc_update = byond_string!("update");
 
-        solars.iter().for_each(|solar| {
+        self.solars.borrow().values().for_each(|solar| {
             let _ = solar.call_id(proc_update, &[]);
         });
 
-        Ok(ByondValue::from(true))
+        Ok(ByondValue::null())
     }
 
-    pub fn add_solar(&self, solar: ByondValue) -> eyre::Result<ByondValue> {
-        self.solars.write().push(solar);
-        Ok(ByondValue::from(true))
+    #[inline]
+    pub fn add_solar(&self, solar: &ByondValue, solar_uid: u32) -> eyre::Result<ByondValue> {
+        self.solars.borrow_mut().insert(solar_uid, *solar);
+        Ok(ByondValue::null())
     }
 
-    pub fn remove_solar(&self, solar: &ByondValue) -> eyre::Result<ByondValue> {
-        self.solars.write().retain(|element| element != solar);
-        Ok(ByondValue::from(true))
-    }
-
-    pub fn get_dy(&self) -> eyre::Result<ByondValue> {
-        Ok(ByondValue::from(self.dy.load(Ordering::Relaxed)))
-    }
-
-    pub fn get_dx(&self) -> eyre::Result<ByondValue> {
-        Ok(ByondValue::from(self.dx.load(Ordering::Relaxed)))
-    }
-
-    pub fn get_angle(&self) -> eyre::Result<ByondValue> {
-        Ok(ByondValue::from(self.angle.load(Ordering::Relaxed)))
-    }
-
-    pub fn get_solars_length(&self) -> eyre::Result<ByondValue> {
-        Ok(ByondValue::from(self.solars.read().len() as f32))
+    #[inline]
+    pub fn remove_solar(&self, solar_uid: u32) -> eyre::Result<ByondValue> {
+        self.solars.borrow_mut().remove(&solar_uid);
+        Ok(ByondValue::null())
     }
 }
