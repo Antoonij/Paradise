@@ -4,6 +4,13 @@ on:
   issue_comment:
     types: [created]
 
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'Pull Request number to test against'
+        required: true
+        type: number
+
 jobs:
   build-and-check:
     permissions:
