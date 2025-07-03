@@ -109,6 +109,18 @@ jobs:
           sudo systemctl start mysql
           python3 tools/ci/generate_sql_scripts.py
           tools/ci/validate_sql.sh
+      - name: Install Rust & deps
+        run: |
+          sudo dpkg --add-architecture i386
+          sudo apt update || true
+          sudo apt install -y lib32z1 git pkg-config libssl-dev:i386 libssl-dev zlib1g-dev:i386 curl gcc libdbus-1-dev
+          curl https://sh.rustup.rs -sSf | sh -s -- -y
+          source "$HOME/.cargo/env"
+      - name: Build rustlib
+        run: |
+          cargo build --release \
+            --target i686-unknown-linux-gnu \
+            --manifest-path rust/Cargo.toml
       - name: Install RUST_G Deps
         run: |
           sudo dpkg --add-architecture i386
