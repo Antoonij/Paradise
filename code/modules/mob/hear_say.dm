@@ -1,7 +1,7 @@
 #define EMPHASIS_LETTERS_REGEX "\[^\\+\\|_%]"
 // At minimum every mob has a hear_say proc.
 
-/mob/proc/combine_message(list/message_pieces, atom/movable/speaker, always_stars = FALSE)
+/mob/proc/combine_message(list/message_pieces, atom/movable/speaker, always_stars = FALSE, atom/movable/receiver)
 	var/iteration_count = 0
 	var/msg = ""
 	for(var/datum/multilingual_say_piece/SP in message_pieces)
@@ -32,10 +32,15 @@
 				piece = SP.speaking.scramble(piece)
 			else
 				piece = stars(piece)
+		
+		if(receiver)
+			SEND_SIGNAL(receiver, COMSIG_COMBINE_MESSAGE_FOR_RECEIVER, &piece)
+
 		if(SP.speaking)
 			piece = SP.speaking.format_message(piece, speaker)
 		else
 			piece = "<span class='message'><span class='body'>[piece]</span></span>"
+			
 		msg += (piece + " ")
 
 	if(msg == "")
@@ -128,7 +133,7 @@
 		var/mob/living/carbon/human/H = speaker
 		speaker_name = H.GetVoice()
 
-	var/message_clean = say_emphasis(combine_message(message_pieces, speaker))
+	var/message_clean = say_emphasis(combine_message(message_pieces, speaker, receiver = src))
 	message_clean = replace_characters(message_clean, list("+"))
 	if(message_clean == "")
 		return
@@ -215,7 +220,7 @@
 		hear_sleep(multilingual_to_message(message_pieces))
 		return
 
-	var/message_clean = combine_message(message_pieces, speaker, always_stars = hard_to_hear)
+	var/message_clean = combine_message(message_pieces, speaker, TRUE, src)
 	message_clean = replace_characters(message_clean, list("+"))
 
 	if(message_clean == "")
@@ -290,7 +295,7 @@
 	if(!can_hear())
 		return
 
-	var/message_clean = combine_message(message_pieces, speaker)
+	var/message_clean = combine_message(message_pieces, speaker, receiver = src)
 	message_clean = replace_characters(message_clean, list("+"))
 
 	if(message_clean == "")

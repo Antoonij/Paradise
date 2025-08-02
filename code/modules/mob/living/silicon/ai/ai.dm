@@ -1376,7 +1376,7 @@ GLOBAL_LIST_INIT(ai_verbs_default, list(
 	return get_dist(src, A) <= max(viewscale[1]*0.5,viewscale[2]*0.5)
 
 /mob/living/silicon/ai/proc/relay_speech(mob/living/M, list/message_pieces, verb)
-	var/message_clean = combine_message(message_pieces, M)
+	var/message_clean = combine_message(message_pieces, M, receiver = src)
 	message_clean = replace_characters(message_clean, list("+"))
 
 	var/message = verb_message(message_pieces, message_clean, M, genderize_decode(M, verb))

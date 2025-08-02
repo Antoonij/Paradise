@@ -689,3 +689,13 @@
 	enable_message = "Теперь сообщения о боли будут выводиться на основной экран."
 	disable_message = "Теперь сообщения о боли будут писаться в чат."
 	blackbox_message = "Toggle painblurb"
+
+/datum/preference_toggle/toggle_twitch_filter
+	name = "Переключить фильтр запрещённых на Twitch слов"
+	description = "Переключает фильтрацию запрещённых слов на Twitch."
+	preftoggle_bitflag = PREFTOGGLE_3_TWITCH_FILTER
+	preftoggle_toggle = PREFTOGGLE_TOGGLE3
+	preftoggle_category = PREFTOGGLE_CATEGORY_GENERAL
+	enable_message = "Теперь сообщения, содержащие запрещенные на Twitch слова будут заменяться/цензурироваться."
+	disable_message = "Сообщения, содержащие запрещенные на Twitch слова не будут заменяться/цензурироваться."
+	blackbox_message = "Toggle twitch filter"

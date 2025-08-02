@@ -1425,3 +1425,7 @@
 	#define CONTAINER_INSERT_FAILED (1<<1)
 
 #define COMSIGN_TICKET_COUNT_UPDATE "ticket_count_updated"
+
+#define COMSIG_COMBINE_MESSAGE_FOR_RECEIVER "combine_message_for_receiver"
+
+#define COMSIG_CREATE_CHAT_MESSAGE_PRE_SEND "chat_message_pre_send"

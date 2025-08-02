@@ -141,6 +141,9 @@ GLOBAL_LIST_EMPTY(preferences_info)
 /datum/preference_info/auto_dnr
     name = "Do Not Revive status after death"
 
+/datum/preference_info/twitch_filter
+    name = "Twitch bad words filter"
+
 /datum/preference_info/deadchat_visibility/get_preference_toggle()
     return GLOB.preference_toggles[/datum/preference_toggle/toggle_deadchat_visibility]
 
@@ -273,6 +276,9 @@ GLOBAL_LIST_EMPTY(preferences_info)
 /datum/preference_info/pain_blurb/get_preference_toggle()
     return GLOB.preference_toggles[/datum/preference_toggle/pain_blurb]
 
+/datum/preference_info/twitch_filter/get_preference_toggle()
+    return GLOB.preference_toggles[/datum/preference_toggle/toggle_twitch_filter]
+
 /datum/preference_info/auto_dnr/activate(mob/target)
     RegisterSignal(target, COMSIG_MOB_DEATH, PROC_REF(set_dnr_status))
 
@@ -286,3 +292,18 @@ GLOBAL_LIST_EMPTY(preferences_info)
 
     var/mob/dead/observer/ghost = source.ghostize()
     ghost.apply_dnr()
+
+/datum/preference_info/twitch_filter/activate(mob/target)
+    RegisterSignal(target, COMSIG_CREATE_CHAT_MESSAGE_PRE_SEND, PROC_REF(filter_message))
+    RegisterSignal(target, COMSIG_COMBINE_MESSAGE_FOR_RECEIVER, PROC_REF(filter_message))
+
+    return TRUE
+
+/datum/preference_info/twitch_filter/deactivate(mob/target)
+    UnregisterSignal(target, COMSIG_CREATE_CHAT_MESSAGE_PRE_SEND)
+    UnregisterSignal(target, COMSIG_COMBINE_MESSAGE_FOR_RECEIVER)
+
+/datum/preference_info/twitch_filter/proc/filter_message(mob/source, message)
+    SIGNAL_HANDLER
+
+    *message = RUSTLIB_CALL(twitch_sanitize, *message)

@@ -381,6 +381,8 @@
 	// Ensure the list we are using, if present, is a copy so we don't modify the list provided to us
 	spans = spans ? spans.Copy() : null
 
+	SEND_SIGNAL(src, COMSIG_CREATE_CHAT_MESSAGE_PRE_SEND, &raw_message)
+
 	// Display visual above source
 	new /datum/chatmessage(raw_message, speaker, src, language, spans)
 
