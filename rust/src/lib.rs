@@ -1,2 +1,2 @@
-mod twitch_filter;
+mod rustrict;
 mod uuid;

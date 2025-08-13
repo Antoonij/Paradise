@@ -32,9 +32,6 @@
 				piece = SP.speaking.scramble(piece)
 			else
 				piece = stars(piece)
-		
-		if(receiver)
-			SEND_SIGNAL(receiver, COMSIG_COMBINE_MESSAGE_FOR_RECEIVER, &piece)
 
 		if(SP.speaking)
 			piece = SP.speaking.format_message(piece, speaker)
@@ -46,6 +43,9 @@
 	if(msg == "")
 		. = ""
 		return
+
+	if(receiver)
+		SEND_SIGNAL(receiver, COMSIG_COMBINE_MESSAGE_FOR_RECEIVER, &msg)
 
 	if(isliving(src))
 		for(var/datum/component/codeword_hearing/hearing_datum in GetComponents(/datum/component/codeword_hearing))
