@@ -176,31 +176,43 @@
 	return TRUE
 
 /obj/effect/proc_holder/spell/pulse_demon/overload
-	name = "Overload Machine"
-	desc = "Overloads a machine, causing it to explode."
+	name = "Перегрузка Машины"
+	desc = "Перегружает контроллер питания, ускоряя химические реакции, происходящие в нём. Результаты реакции спустя некоторое время выходят наружу."
 	action_icon_state = "pd_overload"
 	unlock_cost = 300 KW
 	cast_cost = 50 KW
 	upgrade_cost = 500 KW
 	requires_area = TRUE
 
-/obj/effect/proc_holder/spell/pulse_demon/overload/try_cast_action(mob/living/simple_animal/demon/pulse_demon/user, atom/target)
-	var/obj/machinery/M = target
-	if(!istype(M))
-		to_chat(user, span_warning("That is not a machine."))
+/obj/effect/proc_holder/spell/pulse_demon/overload/try_cast_action(mob/living/simple_animal/demon/pulse_demon/user, obj/machinery/machinery)
+	if(!istype(machinery))
+		balloon_alert(user, "это не машина!")
 		return FALSE
-	if(M.resistance_flags & NO_MALF_EFFECT)
-		to_chat(user, span_warning("That machine cannot be overloaded."))
+
+	if(machinery.inoperable)
+		balloon_alert(user, "машина неработоспособна!")
 		return FALSE
-	target.audible_message(span_italics(">You hear a loud electrical buzzing sound coming from [target]!"))
-	addtimer(CALLBACK(src, PROC_REF(detonate), M), 5 SECONDS)
+
+	if(machinery.resistance_flags & NO_MALF_EFFECT)
+		balloon_alert(user, "машина неперегужаема!")
+		return FALSE
+
+	playsound(machinery.loc, 'sound/misc/interference.ogg', 50, TRUE)
+	addtimer(CALLBACK(src, PROC_REF(overload), machinery), 5 SECONDS)
+
 	return TRUE
 
-/obj/effect/proc_holder/spell/pulse_demon/overload/proc/detonate(obj/machinery/target)
-	if(!QDELETED(target))
-		explosion(get_turf(target), 0, 1, 1, 0)
-		if(!QDELETED(target))
-			qdel(target)
+/obj/effect/proc_holder/spell/pulse_demon/overload/proc/overload(obj/machinery/target)
+	if(QDELETED(target) || !isturf(target.loc))
+		return
+
+	for(var/turf/simulated/turf in range(2, target))
+		if(iswallturf(turf) || ismineralturf(turf))
+			continue
+
+		turf.MakeSlippery(TURF_WET_LUBE, min_wet_time = 30 SECONDS, wet_time_to_add = 5 SECONDS)
+
+	goonchem_vortex(target.loc, 0, LAZYLEN(target.contents))
 
 /obj/effect/proc_holder/spell/pulse_demon/remotehijack
 	name = "Remote Hijack"
