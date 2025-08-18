@@ -177,7 +177,7 @@
 
 /obj/effect/proc_holder/spell/pulse_demon/overload
 	name = "Перегрузка Машины"
-	desc = "Перегружает контроллер питания, ускоряя химические реакции, происходящие в нём. Результаты реакции спустя некоторое время выходят наружу."
+	desc = "Перегружает контроллер питания, ускоряя химические реакции, происходящие в нём. Результаты реакций спустя некоторое время выходят наружу."
 	action_icon_state = "pd_overload"
 	unlock_cost = 300 KW
 	cast_cost = 50 KW
@@ -193,7 +193,7 @@
 		balloon_alert(user, "машина неработоспособна!")
 		return FALSE
 
-	if(machinery.resistance_flags & NO_MALF_EFFECT)
+	if(HASBIT(machinery.resistance_flags, NO_MALF_EFFECT))
 		balloon_alert(user, "машина неперегужаема!")
 		return FALSE
 
